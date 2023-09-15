@@ -5,12 +5,17 @@ enum CellType {
   Wumpus,
   Pit,
   Treasure,
+  Breeze,
+  Smell,
+  BreezeAndSmell
 }
 
 interface Cell {
   type: CellType;
   isCovered: boolean;
   hasBreeze: boolean;
+  hasSmell: boolean;
+  isAdjacentToTreasure: boolean;
 }
 
 @Component({
@@ -19,14 +24,14 @@ interface Cell {
   styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit {
-  board: Cell[][]=[];
-  playerPosition: { row: number; col: number; }= {row:0, col:0};
+  board: Cell[][] = [];
+  playerPosition: { row: number; col: number; } = { row: 0, col: 0 };
 
   ngOnInit(): void {
     this.initializeBoard();
-    this.placePitsAndWumpus();
+    this.placePitsWumpusTreasure();
     this.playerPosition = { row: 0, col: 0 };
-    this.calculateBreeze();
+
   }
 
   initializeBoard(): void {
@@ -34,16 +39,22 @@ export class BoardComponent implements OnInit {
     for (let row = 0; row < 10; row++) {
       const newRow: Cell[] = [];
       for (let col = 0; col < 10; col++) {
-        newRow.push({ type: CellType.Empty, isCovered: true ,hasBreeze:false});
+        newRow.push({
+          type: CellType.Empty, isCovered: true, hasBreeze: false, hasSmell: false,
+          isAdjacentToTreasure: false,
+         
+        });
       }
       this.board.push(newRow);
     }
   }
 
-  placePitsAndWumpus(): void {
-    this.placeRandomElements(CellType.Pit, 10);
-    this.placeRandomElements(CellType.Wumpus, 1);
+  placePitsWumpusTreasure(): void {
+    this.placeRandomElements(CellType.Pit, 5); // Place 5 pits
+    this.placeRandomElements(CellType.Wumpus, 1); // Place 1 Wumpus
+    this.placeRandomElements(CellType.Treasure, 1); // Place 1 treasure
   }
+  
 
 
   //Generate game
@@ -52,7 +63,7 @@ export class BoardComponent implements OnInit {
       let rowIndex: number;
       let colIndex: number;
       do {
-        
+
         rowIndex = Math.floor(Math.random() * this.board.length);
         colIndex = Math.floor(Math.random() * this.board[0].length);
       } while (this.board[rowIndex][colIndex].type !== CellType.Empty);
@@ -60,30 +71,41 @@ export class BoardComponent implements OnInit {
       // Place the element at the random position
       this.board[rowIndex][colIndex].type = elementType;
     }
+
+    this.calculateBreezeAndSmell();
+    this.highlightAdjacentToTreasure();
     
   }
 
   getCellImage(cellType: CellType): string {
     switch (cellType) {
       case CellType.Wumpus:
-        return 'assets/wumpus.jpg';
+        return 'assets/wumpus.png';
       case CellType.Pit:
-        return 'assets/pit.png';
+        return 'assets/hole2.jpg';
+      case CellType.Breeze:
+        return 'assets/breeze3.png';
       case CellType.Treasure:
         return 'assets/Treasure.jpg';
-        case CellType.Empty:
-          return 'assets/explored.png';
+      case CellType.Smell:
+        return 'assets/smell2.png';
+      case CellType.BreezeAndSmell:
+        return 'assets/bs.png';
+      case CellType.Empty:
+        return 'assets/bg3.jpg';
       default:
         return '';
     }
   }
 
-  calculateBreeze(): void {
+  calculateBreezeAndSmell(): void {
     for (let rowIndex = 0; rowIndex < this.board.length; rowIndex++) {
       for (let colIndex = 0; colIndex < this.board[rowIndex].length; colIndex++) {
         if (this.board[rowIndex][colIndex].type === CellType.Pit) {
-          // For each adjacent cell, set the breeze property to true
           this.setBreezeOnAdjacentCells(rowIndex, colIndex);
+        }
+        if (this.board[rowIndex][colIndex].type === CellType.Wumpus) {
+          this.setSmellOnAdjacentCells(rowIndex, colIndex);
         }
       }
     }
@@ -107,10 +129,70 @@ export class BoardComponent implements OnInit {
       ) {
         // Set the breeze property to true for adjacent cells
         this.board[adjacentRow][adjacentCol].hasBreeze = true;
+        this.board[adjacentRow][adjacentCol].type = CellType.Breeze;
       }
     }
   }
 
+  setSmellOnAdjacentCells(rowIndex: number, colIndex: number): void {
+    const offsets = [
+      { row: -1, col: 0 }, // Up
+      { row: 1, col: 0 },  // Down
+      { row: 0, col: -1 }, // Left
+      { row: 0, col: 1 }   // Right
+    ];
+
+    for (const offset of offsets) {
+      const adjacentRow = rowIndex + offset.row;
+      const adjacentCol = colIndex + offset.col;
+
+      if (
+        adjacentRow >= 0 && adjacentRow < this.board.length &&
+        adjacentCol >= 0 && adjacentCol < this.board[0].length
+      ) {
+        // Set the smell property to true for adjacent cells
+        this.board[adjacentRow][adjacentCol].hasSmell = true;
+
+        // If the cell already has a breeze, set both breeze and smell properties
+        if (this.board[adjacentRow][adjacentCol].hasBreeze) {
+          this.board[adjacentRow][adjacentCol].type = CellType.BreezeAndSmell;
+        } else {
+          this.board[adjacentRow][adjacentCol].type = CellType.Smell;
+        }
+      }
+    }
+  }
+
+  highlightAdjacentToTreasure(): void {
+    for (let rowIndex = 0; rowIndex < this.board.length; rowIndex++) {
+      for (let colIndex = 0; colIndex < this.board[rowIndex].length; colIndex++) {
+        if (this.board[rowIndex][colIndex].type === CellType.Treasure) {
+          this.setAdjacentToTreasure(rowIndex, colIndex);
+        }
+      }
+    }
+  }
+
+  setAdjacentToTreasure(treasureRowIndex: number, treasureColIndex: number): void {
+    const offsets = [
+      { row: -1, col: 0 }, // Up
+      { row: 1, col: 0 },  // Down
+      { row: 0, col: -1 }, // Left
+      { row: 0, col: 1 }   // Right
+    ];
+
+    for (const offset of offsets) {
+      const adjacentRow = treasureRowIndex + offset.row;
+      const adjacentCol = treasureColIndex + offset.col;
+
+      if (
+        adjacentRow >= 0 && adjacentRow < this.board.length &&
+        adjacentCol >= 0 && adjacentCol < this.board[0].length
+      ) {
+        this.board[adjacentRow][adjacentCol].isAdjacentToTreasure = true;
+      }
+    }
+  }
   getCellClass(rowIndex: number, colIndex: number): string {
     // Implement logic to return additional CSS classes based on cell type or game state
     // For example, you can add CSS classes for highlighting the player's position.
@@ -124,7 +206,7 @@ export class BoardComponent implements OnInit {
       this.board[rowIndex][colIndex].isCovered = false;
       this.playerPosition = { row: rowIndex, col: colIndex };
     }
+console.log(this.board[rowIndex][colIndex])
 
-    
   }
 }
