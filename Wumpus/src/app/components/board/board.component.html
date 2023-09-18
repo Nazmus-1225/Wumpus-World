@@ -1,8 +1,11 @@
 <div class="board">
   <div *ngFor="let row of board; let rowIndex = index" class="row">
-    <div *ngFor="let cell of row; let colIndex = index" class="cell" [ngClass]="getCellClass(rowIndex, colIndex)"
-      (click)="revealCell(rowIndex, colIndex)">
-
+    <div *ngFor="let cell of row; let colIndex = index" class="cell"
+     
+      [ngClass]="{ 'highlighted': isCellAvailableMove(rowIndex, colIndex) }"
+      (click)="revealCell(rowIndex, colIndex)" 
+      >
+      
       <div class="image-container">
         <div class="cell treasure-highlight overlay-image" *ngIf="!cell.isCovered && cell.isAdjacentToTreasure"></div>
         <img *ngIf="!cell.isCovered || (rowIndex === playerPosition.row && colIndex === playerPosition.col)"

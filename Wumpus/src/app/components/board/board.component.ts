@@ -7,7 +7,10 @@ enum CellType {
   Treasure,
   Breeze,
   Smell,
-  BreezeAndSmell
+  Light,
+  BreezeAndSmell,
+  BreezeAndLight,
+  SmellAndLight
 }
 
 interface Cell {
@@ -26,12 +29,14 @@ interface Cell {
 export class BoardComponent implements OnInit {
   board: Cell[][] = [];
   playerPosition: { row: number; col: number; } = { row: 0, col: 0 };
-  
+
   availableMoves: { row: number; col: number }[] = [];
+  highlightedCells: { row: number; col: number }[] = [];
   moveMode: boolean = false;
 
+
   ngOnInit(): void {
-    
+
     this.playerPosition = { row: 0, col: 0 };
     this.initializeBoard();
     this.placePitsWumpusTreasure();
@@ -46,14 +51,39 @@ export class BoardComponent implements OnInit {
         newRow.push({
           type: CellType.Empty, isCovered: true, hasBreeze: false, hasSmell: false,
           isAdjacentToTreasure: false,
-         
+
         });
       }
       this.board.push(newRow);
     }
+    this.board[0][0].isCovered = false;
+    this.calculateAvailableMoves();
   }
 
-  calculateAvailableMoves() {
+  revealCell(rowIndex: number, colIndex: number): void {
+    if (this.isMoveAvailable(rowIndex, colIndex)) {
+      this.board[rowIndex][colIndex].isCovered = false;
+      this.playerPosition = { row: rowIndex, col: colIndex };
+      this.calculateAvailableMoves();
+    }
+  }
+
+  isMoveAvailable(rowIndex: number, colIndex: number): boolean {
+    const adjacentCells = this.calculateAdjacentCells();
+    return adjacentCells.some(
+      (move) => move.row === rowIndex && move.col === colIndex
+    );
+  }
+
+  isCellAvailableMove(rowIndex: number, colIndex: number): boolean {
+    return this.availableMoves.some(
+      (move) => move.row === rowIndex && move.col === colIndex
+    );
+  }
+
+
+
+  calculateAdjacentCells(): { row: number; col: number }[] {
     const { row, col } = this.playerPosition;
     const adjacentCells = [
       { row: row - 1, col },
@@ -62,7 +92,7 @@ export class BoardComponent implements OnInit {
       { row, col: col + 1 },
     ];
 
-    this.availableMoves = adjacentCells.filter(
+    return adjacentCells.filter(
       (cell) =>
         cell.row >= 0 &&
         cell.row < this.board.length &&
@@ -71,37 +101,17 @@ export class BoardComponent implements OnInit {
     );
   }
 
-  onPlayerClick() {
-    if (!this.moveMode) {
-      this.moveMode = true;
-      this.calculateAvailableMoves();
-    } else {
-      this.moveMode = false;
-      this.availableMoves = [];
-    }
+  calculateAvailableMoves(): void {
+    this.availableMoves = this.calculateAdjacentCells();
   }
 
-  onCellClick(rowIndex: number, colIndex: number) {
-    if (this.moveMode) {
-      const selectedMove = this.availableMoves.find(
-        (move) =>
-          move.row === rowIndex && move.col === colIndex
-      );
-
-      if (selectedMove) {
-        this.playerPosition = selectedMove;
-        this.moveMode = false;
-        this.availableMoves = [];
-      }
-    }
-  }
 
   placePitsWumpusTreasure(): void {
     this.placeRandomElements(CellType.Pit, 5); // Place 5 pits
     this.placeRandomElements(CellType.Wumpus, 1); // Place 1 Wumpus
     this.placeRandomElements(CellType.Treasure, 1); // Place 1 treasure
   }
-  
+
 
 
   //Generate game
@@ -110,19 +120,20 @@ export class BoardComponent implements OnInit {
       let rowIndex: number;
       let colIndex: number;
       do {
-
         rowIndex = Math.floor(Math.random() * this.board.length);
         colIndex = Math.floor(Math.random() * this.board[0].length);
-      } while (this.board[rowIndex][colIndex].type !== CellType.Empty);
+      } while (
+        this.board[rowIndex][colIndex].type !== CellType.Empty ||
+        (rowIndex === 0 && colIndex === 0)
+      );
 
-      // Place the element at the random position
       this.board[rowIndex][colIndex].type = elementType;
     }
 
     this.calculateBreezeAndSmell();
     this.highlightAdjacentToTreasure();
-    
   }
+
 
   getCellImage(cellType: CellType): string {
     switch (cellType) {
@@ -139,7 +150,7 @@ export class BoardComponent implements OnInit {
       case CellType.BreezeAndSmell:
         return 'assets/bs.png';
       case CellType.Empty:
-        return 'assets/bg3.jpg';
+        return 'assets/bg.png';
       default:
         return '';
     }
@@ -240,39 +251,8 @@ export class BoardComponent implements OnInit {
       }
     }
   }
-  getCellClass(rowIndex: number, colIndex: number): string {
-    // Implement logic to return additional CSS classes based on cell type or game state
-    // For example, you can add CSS classes for highlighting the player's position.
-    return '';
-  }
 
 
 
-  revealCell(rowIndex: number, colIndex: number): void {
-    if (this.board[rowIndex][colIndex].isCovered) {
-      this.board[rowIndex][colIndex].isCovered = false;
-      this.playerPosition = { row: rowIndex, col: colIndex };
-    }
-console.log(this.board[rowIndex][colIndex])
 
-  }
-
-  // revealCell(rowIndex: number, colIndex: number): void {
-  //   const cell = this.board[rowIndex][colIndex];
-  
-  //   if (cell.isCovered && this.moveMode && this.isMoveAvailable(rowIndex, colIndex)) {
-  //     this.playerPosition = { row: rowIndex, col: colIndex };
-  //     this.moveMode = false;
-  //     this.availableMoves = [];
-  //   } else if (cell.isCovered) {
-  //     cell.isCovered = false;
-  //   }
-  
-  //   console.log(cell);
-  // }
-  
-  // Function to check if a cell is an available move
-  isMoveAvailable(rowIndex: number, colIndex: number): boolean {
-    return this.availableMoves.some((move) => move.row === rowIndex && move.col === colIndex);
-  }
 }
