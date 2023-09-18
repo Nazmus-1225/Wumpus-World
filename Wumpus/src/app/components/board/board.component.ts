@@ -10,9 +10,44 @@ enum CellType {
   Light,
   BreezeAndSmell,
   BreezeAndLight,
-  SmellAndLight
+  SmellAndLight,
+  BreezeAndPit,
+  SmellAndPit,
+  LightAndPit,
+  Smell_Breeze_And_Light //yet to implement
 }
-
+function getCellTypeString(cellType: CellType): string {
+  switch (cellType) {
+    case CellType.Empty:
+      return "Empty";
+    case CellType.Wumpus:
+      return "Wumpus";
+    case CellType.Pit:
+      return "Pit";
+    case CellType.Treasure:
+      return "Treasure";
+    case CellType.Breeze:
+      return "Breeze";
+    case CellType.Smell:
+      return "Smell";
+    case CellType.Light:
+      return "Light";
+    case CellType.BreezeAndSmell:
+      return "BreezeAndSmell";
+    case CellType.BreezeAndLight:
+      return "BreezeAndLight";
+    case CellType.SmellAndLight:
+      return "SmellAndLight";
+    case CellType.BreezeAndPit:
+      return "BreezeAndPit";
+    case CellType.SmellAndPit:
+      return "SmellAndPit";
+    case CellType.LightAndPit:
+      return "LightAndPit";
+    default:
+      return "Unknown";
+  }
+}
 interface Cell {
   type: CellType;
   isCovered: boolean;
@@ -36,7 +71,6 @@ export class BoardComponent implements OnInit {
 
 
   ngOnInit(): void {
-
     this.playerPosition = { row: 0, col: 0 };
     this.initializeBoard();
     this.placePitsWumpusTreasure();
@@ -61,6 +95,7 @@ export class BoardComponent implements OnInit {
   }
 
   revealCell(rowIndex: number, colIndex: number): void {
+    console.log(getCellTypeString(this.board[rowIndex][colIndex].type));
     if (this.isMoveAvailable(rowIndex, colIndex)) {
       this.board[rowIndex][colIndex].isCovered = false;
       this.playerPosition = { row: rowIndex, col: colIndex };
@@ -80,8 +115,6 @@ export class BoardComponent implements OnInit {
       (move) => move.row === rowIndex && move.col === colIndex
     );
   }
-
-
 
   calculateAdjacentCells(): { row: number; col: number }[] {
     const { row, col } = this.playerPosition;
@@ -108,8 +141,8 @@ export class BoardComponent implements OnInit {
 
   placePitsWumpusTreasure(): void {
     this.placeRandomElements(CellType.Pit, 5); // Place 5 pits
-    this.placeRandomElements(CellType.Wumpus, 1); // Place 1 Wumpus
-    this.placeRandomElements(CellType.Treasure, 1); // Place 1 treasure
+    this.placeRandomElements(CellType.Wumpus, 5); // Place 1 Wumpus
+    this.placeRandomElements(CellType.Treasure, 5); // Place 1 treasure
   }
 
 
@@ -130,8 +163,7 @@ export class BoardComponent implements OnInit {
       this.board[rowIndex][colIndex].type = elementType;
     }
 
-    this.calculateBreezeAndSmell();
-    this.highlightAdjacentToTreasure();
+    this.calculateBreezeSmellAndLight();
   }
 
 
@@ -140,119 +172,138 @@ export class BoardComponent implements OnInit {
       case CellType.Wumpus:
         return 'assets/wumpus.png';
       case CellType.Pit:
-        return 'assets/hole2.jpg';
+        return 'assets/hole.png';
       case CellType.Breeze:
-        return 'assets/breeze4.png';
+        return 'assets/breeze.png';
       case CellType.Treasure:
         return 'assets/Treasure.jpg';
       case CellType.Smell:
-        return 'assets/smell2.png';
+        return 'assets/smell.png';
+      case CellType.Light:
+        return 'assets/light.jpg';
       case CellType.BreezeAndSmell:
         return 'assets/bs.png';
+      case CellType.LightAndPit:
+        return 'assets/LightAndPit.jpg';
+      case CellType.BreezeAndLight:
+        return 'assets/LightAndBreeze.jpg';
+      case CellType.SmellAndLight:
+        return 'assets/LightAndSmell.jpg';
       case CellType.Empty:
         return 'assets/bg.png';
       default:
         return '';
     }
   }
+  calculateBreezeSmellAndLight(): void {
+    this.generateCellTypes(CellType.Pit);
+    this.generateCellTypes(CellType.Wumpus);
+    this.generateCellTypes(CellType.Treasure);
+  }
 
-  calculateBreezeAndSmell(): void {
+  generateCellTypes(sourceType: CellType): void {
+    const offsets = [
+      { row: -1, col: 0 }, // Up
+      { row: 1, col: 0 },  // Down
+      { row: 0, col: -1 }, // Left
+      { row: 0, col: 1 },  // Right
+    ];
+
     for (let rowIndex = 0; rowIndex < this.board.length; rowIndex++) {
       for (let colIndex = 0; colIndex < this.board[rowIndex].length; colIndex++) {
-        if (this.board[rowIndex][colIndex].type === CellType.Pit) {
-          this.setBreezeOnAdjacentCells(rowIndex, colIndex);
-        }
-        if (this.board[rowIndex][colIndex].type === CellType.Wumpus) {
-          this.setSmellOnAdjacentCells(rowIndex, colIndex);
-        }
-      }
-    }
-  }
+        if (this.board[rowIndex][colIndex].type === sourceType) {
+          for (const offset of offsets) {
+            const adjacentRow = rowIndex + offset.row;
+            const adjacentCol = colIndex + offset.col;
 
-  setBreezeOnAdjacentCells(rowIndex: number, colIndex: number): void {
-    const offsets = [
-      { row: -1, col: 0 }, // Up
-      { row: 1, col: 0 },  // Down
-      { row: 0, col: -1 }, // Left
-      { row: 0, col: 1 }   // Right
-    ];
+            if (
+              adjacentRow >= 0 && adjacentRow < this.board.length &&
+              adjacentCol >= 0 && adjacentCol < this.board[0].length
+            ) {
+              const adjacentCell = this.board[adjacentRow][adjacentCol];
 
-    for (const offset of offsets) {
-      const adjacentRow = rowIndex + offset.row;
-      const adjacentCol = colIndex + offset.col;
-
-      if (
-        adjacentRow >= 0 && adjacentRow < this.board.length &&
-        adjacentCol >= 0 && adjacentCol < this.board[0].length
-      ) {
-        // Set the breeze property to true for adjacent cells
-        this.board[adjacentRow][adjacentCol].hasBreeze = true;
-        this.board[adjacentRow][adjacentCol].type = CellType.Breeze;
-      }
-    }
-  }
-
-  setSmellOnAdjacentCells(rowIndex: number, colIndex: number): void {
-    const offsets = [
-      { row: -1, col: 0 }, // Up
-      { row: 1, col: 0 },  // Down
-      { row: 0, col: -1 }, // Left
-      { row: 0, col: 1 }   // Right
-    ];
-
-    for (const offset of offsets) {
-      const adjacentRow = rowIndex + offset.row;
-      const adjacentCol = colIndex + offset.col;
-
-      if (
-        adjacentRow >= 0 && adjacentRow < this.board.length &&
-        adjacentCol >= 0 && adjacentCol < this.board[0].length
-      ) {
-        // Set the smell property to true for adjacent cells
-        this.board[adjacentRow][adjacentCol].hasSmell = true;
-
-        // If the cell already has a breeze, set both breeze and smell properties
-        if (this.board[adjacentRow][adjacentCol].hasBreeze) {
-          this.board[adjacentRow][adjacentCol].type = CellType.BreezeAndSmell;
-        } else {
-          this.board[adjacentRow][adjacentCol].type = CellType.Smell;
+              // Handle target types based on source type
+              switch (sourceType) {
+                case CellType.Pit:
+                  this.handlePitTargetTypes(adjacentCell);
+                  break;
+                case CellType.Wumpus:
+                  this.handleWumpusTargetTypes(adjacentCell);
+                  break;
+                case CellType.Treasure:
+                  this.handleTreasureTargetTypes(adjacentCell);
+                  break;
+                // Add cases for other source types if needed
+              }
+            }
+          }
         }
       }
     }
   }
 
-  highlightAdjacentToTreasure(): void {
-    for (let rowIndex = 0; rowIndex < this.board.length; rowIndex++) {
-      for (let colIndex = 0; colIndex < this.board[rowIndex].length; colIndex++) {
-        if (this.board[rowIndex][colIndex].type === CellType.Treasure) {
-          this.setAdjacentToTreasure(rowIndex, colIndex);
-        }
-      }
-    }
-  }
-
-  setAdjacentToTreasure(treasureRowIndex: number, treasureColIndex: number): void {
-    const offsets = [
-      { row: -1, col: 0 }, // Up
-      { row: 1, col: 0 },  // Down
-      { row: 0, col: -1 }, // Left
-      { row: 0, col: 1 }   // Right
-    ];
-
-    for (const offset of offsets) {
-      const adjacentRow = treasureRowIndex + offset.row;
-      const adjacentCol = treasureColIndex + offset.col;
-
-      if (
-        adjacentRow >= 0 && adjacentRow < this.board.length &&
-        adjacentCol >= 0 && adjacentCol < this.board[0].length
-      ) {
-        this.board[adjacentRow][adjacentCol].isAdjacentToTreasure = true;
-      }
+  handlePitTargetTypes(cell: Cell): void {
+    // Handle target types for Pit source
+    switch (cell.type) {
+      case CellType.Empty:
+        cell.type = CellType.Breeze;
+        cell.hasBreeze = true;
+        break;
+      case CellType.Smell:
+        cell.type = CellType.BreezeAndSmell;
+        cell.hasBreeze = true;
+        break;
+      case CellType.Light:
+        cell.type = CellType.BreezeAndLight;
+        cell.hasBreeze = true;
+        break;
+      case CellType.Treasure:
+        // If a pit is adjacent to treasure, it doesn't change to Light
+        cell.type = CellType.BreezeAndLight; // Add this line to handle BreezeAndLight
+        cell.hasBreeze = true;
+        break;
+      default:
+      // Add cases for other target types if needed
     }
   }
 
 
+  handleWumpusTargetTypes(cell: Cell): void {
+    // Handle target types for Wumpus source
+    switch (cell.type) {
+      case CellType.Empty:
+        cell.type = CellType.Smell;
+        cell.hasSmell = true;
+        break;
+      case CellType.Breeze:
+        cell.type = CellType.BreezeAndSmell;
+        cell.hasSmell = true;
+        break;
+      case CellType.Light:
+        cell.type = CellType.SmellAndLight;
+        cell.hasSmell = true;
+        break;
+      // Add cases for other target types if needed
+    }
+  }
 
-
+  handleTreasureTargetTypes(cell: Cell): void {
+    // Handle target types for Treasure source
+    switch (cell.type) {
+      case CellType.Empty:
+        cell.type = CellType.Light;
+        break;
+      case CellType.Breeze:
+        cell.type = CellType.BreezeAndLight;
+        break;
+      case CellType.Smell:
+        cell.type = CellType.SmellAndLight;
+        break;
+      case CellType.Pit:
+        // If a pit is adjacent to treasure, don't change it to Light
+        break;
+      default:
+      // Add cases for other target types if needed
+    }
+  }
 }
