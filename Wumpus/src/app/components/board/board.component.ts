@@ -26,11 +26,15 @@ interface Cell {
 export class BoardComponent implements OnInit {
   board: Cell[][] = [];
   playerPosition: { row: number; col: number; } = { row: 0, col: 0 };
+  
+  availableMoves: { row: number; col: number }[] = [];
+  moveMode: boolean = false;
 
   ngOnInit(): void {
+    
+    this.playerPosition = { row: 0, col: 0 };
     this.initializeBoard();
     this.placePitsWumpusTreasure();
-    this.playerPosition = { row: 0, col: 0 };
 
   }
 
@@ -46,6 +50,49 @@ export class BoardComponent implements OnInit {
         });
       }
       this.board.push(newRow);
+    }
+  }
+
+  calculateAvailableMoves() {
+    const { row, col } = this.playerPosition;
+    const adjacentCells = [
+      { row: row - 1, col },
+      { row: row + 1, col },
+      { row, col: col - 1 },
+      { row, col: col + 1 },
+    ];
+
+    this.availableMoves = adjacentCells.filter(
+      (cell) =>
+        cell.row >= 0 &&
+        cell.row < this.board.length &&
+        cell.col >= 0 &&
+        cell.col < this.board[0].length
+    );
+  }
+
+  onPlayerClick() {
+    if (!this.moveMode) {
+      this.moveMode = true;
+      this.calculateAvailableMoves();
+    } else {
+      this.moveMode = false;
+      this.availableMoves = [];
+    }
+  }
+
+  onCellClick(rowIndex: number, colIndex: number) {
+    if (this.moveMode) {
+      const selectedMove = this.availableMoves.find(
+        (move) =>
+          move.row === rowIndex && move.col === colIndex
+      );
+
+      if (selectedMove) {
+        this.playerPosition = selectedMove;
+        this.moveMode = false;
+        this.availableMoves = [];
+      }
     }
   }
 
@@ -84,7 +131,7 @@ export class BoardComponent implements OnInit {
       case CellType.Pit:
         return 'assets/hole2.jpg';
       case CellType.Breeze:
-        return 'assets/breeze3.png';
+        return 'assets/breeze4.png';
       case CellType.Treasure:
         return 'assets/Treasure.jpg';
       case CellType.Smell:
@@ -208,5 +255,24 @@ export class BoardComponent implements OnInit {
     }
 console.log(this.board[rowIndex][colIndex])
 
+  }
+
+  // revealCell(rowIndex: number, colIndex: number): void {
+  //   const cell = this.board[rowIndex][colIndex];
+  
+  //   if (cell.isCovered && this.moveMode && this.isMoveAvailable(rowIndex, colIndex)) {
+  //     this.playerPosition = { row: rowIndex, col: colIndex };
+  //     this.moveMode = false;
+  //     this.availableMoves = [];
+  //   } else if (cell.isCovered) {
+  //     cell.isCovered = false;
+  //   }
+  
+  //   console.log(cell);
+  // }
+  
+  // Function to check if a cell is an available move
+  isMoveAvailable(rowIndex: number, colIndex: number): boolean {
+    return this.availableMoves.some((move) => move.row === rowIndex && move.col === colIndex);
   }
 }

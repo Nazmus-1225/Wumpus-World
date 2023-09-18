@@ -1,23 +1,18 @@
-
 <div class="board">
   <div *ngFor="let row of board; let rowIndex = index" class="row">
     <div *ngFor="let cell of row; let colIndex = index" class="cell" [ngClass]="getCellClass(rowIndex, colIndex)"
       (click)="revealCell(rowIndex, colIndex)">
-      
-      <!-- Only show the treasure highlight when the cell is revealed -->
-      <div class="cell treasure-highlight" *ngIf="!cell.isCovered && cell.isAdjacentToTreasure"></div>
-      
-      <!-- Show the cell content (image) -->
-      <img *ngIf="!cell.isCovered" [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image">
-      
-      <!-- Show the brick if the cell is covered -->
-      <img *ngIf="cell.isCovered" src="assets/brick.png" alt="Brick" class="cell-image" />
 
-      <!-- Show the player if the player is in this cell -->
-      <img *ngIf="rowIndex === playerPosition.row && colIndex === playerPosition.col" src="assets/player.png"
-        alt="Player" class="player-image" />
+      <div class="image-container">
+        <div class="cell treasure-highlight overlay-image" *ngIf="!cell.isCovered && cell.isAdjacentToTreasure"></div>
+        <img *ngIf="!cell.isCovered || (rowIndex === playerPosition.row && colIndex === playerPosition.col)"
+          [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
+        <img *ngIf="cell.isCovered" src="assets/brick.png" alt="Brick" class="cell-image" />
+
+        <img *ngIf="rowIndex === playerPosition.row && colIndex === playerPosition.col" src="assets/player.png"
+          alt="Player" class="player-image overlay-image" />
+      </div>
+
     </div>
   </div>
 </div>
-
-  
