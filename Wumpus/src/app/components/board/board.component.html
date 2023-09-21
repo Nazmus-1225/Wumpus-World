@@ -1,21 +1,40 @@
-<div class="board">
-  <div *ngFor="let row of board; let rowIndex = index" class="row">
-    <div *ngFor="let cell of row; let colIndex = index" class="cell"
-     
-      [ngClass]="{ 'highlighted': isCellAvailableMove(rowIndex, colIndex) }"
-      (click)="revealCell(rowIndex, colIndex)" 
-      >
-      
-      <div class="image-container">
-        <div class="cell treasure-highlight overlay-image" *ngIf="!cell.isCovered && cell.hasLight"></div>
-        <img *ngIf="!cell.isCovered || (rowIndex === playerPosition.row && colIndex === playerPosition.col)"
-          [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
-        <img *ngIf="cell.isCovered" src="assets/brick.png" alt="Brick" class="cell-image" />
+<div class="game-container">
+  <div class="left-side">
+    <h2>Score: {{ player.point }}</h2>
+  </div>
+  <div class="board">
+    <div *ngFor="let row of board; let rowIndex = index" class="row">
+      <div *ngFor="let cell of row; let colIndex = index" class="cell"
+        [ngClass]="{ 'highlighted': isCellAvailableMove(rowIndex, colIndex) }"
+        (click)="revealCell(rowIndex, colIndex)">
 
-        <img *ngIf="rowIndex === playerPosition.row && colIndex === playerPosition.col" src="assets/player.png"
-          alt="Player" class="player-image overlay-image" />
+        <div class="image-container">
+          <div class="cell treasure-highlight overlay-image" *ngIf="!cell.isCovered && cell.hasLight"></div>
+          <img *ngIf="!cell.isCovered || (rowIndex === player.position.row && colIndex === player.position.col)"
+            [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
+          <img *ngIf="cell.isCovered" src="assets/brick.png" alt="Brick" class="cell-image" />
+
+          <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col"
+            src="assets/player.png" alt="Player" class="player-image overlay-image" />
+        </div>
       </div>
-
     </div>
+  </div>
+
+  <!-- Shoot buttons on the right side -->
+  <div class="shoot-buttons-container">
+    <p>Shoot Arrow</p>
+    <button class="shoot-button" (click)="shootArrow(player.position.row - 1, player.position.col)">
+      <i class="fas fa-arrow-up"></i>Up
+    </button>
+    <button class="shoot-button" (click)="shootArrow(player.position.row + 1, player.position.col)">
+      <i class="fas fa-arrow-down"></i>Down
+    </button>
+    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.col + 1)">
+      <i class="fas fa-arrow-right"></i>Right
+    </button>
+    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.col - 1)">
+      <i class="fas fa-arrow-left"></i>Left
+    </button>
   </div>
 </div>

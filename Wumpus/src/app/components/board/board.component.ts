@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Cell, CellType } from 'src/app/models/cell';
+import { Player } from 'src/app/models/player.model';
+import { MessageModalComponent } from '../message-modal/message-modal.component';
+import { MatDialog } from '@angular/material/dialog';
 
 function getCellTypeString(cellType: CellType): string {
   switch (cellType) {
@@ -43,16 +46,18 @@ function getCellTypeString(cellType: CellType): string {
   styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit {
+
+  constructor( private dialog: MatDialog){}
   board: Cell[][] = [];
   exploredBoard: Cell[][] = [];
-  playerPosition: { row: number; col: number; } = { row: 0, col: 0 };
+  player: Player = new Player();
 
   availableMoves: { row: number; col: number }[] = [];
   moveMode: boolean = false;
 
 
   ngOnInit(): void {
-    this.playerPosition = { row: 0, col: 0 };
+    this.player.position = { row: 0, col: 0 };
     this.initializeBoard();
     this.placePitsWumpusTreasure();
 
@@ -86,9 +91,11 @@ export class BoardComponent implements OnInit {
     console.log(getCellTypeString(this.board[rowIndex][colIndex].type));
     if (this.isMoveAvailable(rowIndex, colIndex)) {
       this.board[rowIndex][colIndex].isCovered = false;
-      this.playerPosition = { row: rowIndex, col: colIndex };
+      this.player.position = { row: rowIndex, col: colIndex };
       this.availableMoves = this.calculateAdjacentCells();
       this.exploredBoard[rowIndex][colIndex] = this.board[rowIndex][colIndex];
+
+      this.updateScore(rowIndex, colIndex);
     }
   }
 
@@ -106,7 +113,7 @@ export class BoardComponent implements OnInit {
   }
 
   calculateAdjacentCells(): { row: number; col: number }[] {
-    const { row, col } = this.playerPosition;
+    const { row, col } = this.player.position;
     const adjacentCells = [
       { row: row - 1, col },
       { row: row + 1, col },
@@ -300,5 +307,47 @@ export class BoardComponent implements OnInit {
       default:
       // Add cases for other target types if needed
     }
+  }
+
+  shootArrow(row: number, col: number) {
+    this.player.hasArrow = false;
+    this.player.point -= 10;
+    this.board[row][col].isCovered = false;
+    this.exploredBoard[row][col] = this.board[row][col];
+
+    if (this.board[row][col].type == CellType.Wumpus) {
+      //kill wumpus and score
+    }
+  }
+
+  updateScore(row: number, col: number) {
+    this.player.point -= 1;
+
+    if (this.board[row][col].type == CellType.Treasure)
+      this.player.point += 1000;
+      else if (this.board[row][col].type == CellType.Wumpus) {
+        this.player.point -= 1000;
+        this.showMessage("Wumpus found you. Game over")
+       //Game Over
+      }
+    else if (this.board[row][col].type == CellType.Pit 
+      || this.board[row][col].type == CellType.BreezeAndPit 
+      || this.board[row][col].type == CellType.SmellAndPit 
+      || this.board[row][col].type == CellType.LightAndPit) {
+      this.player.point -= 1000;
+      this.player.position = { row: 0, col: 0 };
+    }
+
+  }
+
+  showMessage(message: string): void {
+    const dialogRef = this.dialog.open(MessageModalComponent, {
+      width: '300px',
+      data: { message }
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      window.location.reload();
+    });
   }
 }
