@@ -1,6 +1,7 @@
 export enum CellType {
     Empty,
     Wumpus,
+    DeadWumpus,
     Pit,
     Treasure,
     Breeze,
@@ -12,14 +13,14 @@ export enum CellType {
     BreezeAndPit,
     SmellAndPit,
     LightAndPit,
-    Smell_Breeze_And_Light //yet to implement
+    Smell_Breeze_And_Light
   }
 export interface Cell {
     type: CellType;
-    isCovered: boolean;
+    isVisited: boolean;
     hasBreeze: boolean;
     hasSmell: boolean;
     hasLight: boolean;
-    score: number;
+    flag_score: number;
   }
 

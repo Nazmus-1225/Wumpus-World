@@ -3,41 +3,8 @@ import { Cell, CellType } from 'src/app/models/cell';
 import { Player } from 'src/app/models/player.model';
 import { MessageModalComponent } from '../message-modal/message-modal.component';
 import { MatDialog } from '@angular/material/dialog';
-
-function getCellTypeString(cellType: CellType): string {
-  switch (cellType) {
-    case CellType.Empty:
-      return "Empty";
-    case CellType.Wumpus:
-      return "Wumpus";
-    case CellType.Pit:
-      return "Pit";
-    case CellType.Treasure:
-      return "Treasure";
-    case CellType.Breeze:
-      return "Breeze";
-    case CellType.Smell:
-      return "Smell";
-    case CellType.Light:
-      return "Light";
-    case CellType.BreezeAndSmell:
-      return "BreezeAndSmell";
-    case CellType.BreezeAndLight:
-      return "BreezeAndLight";
-    case CellType.SmellAndLight:
-      return "SmellAndLight";
-    case CellType.BreezeAndPit:
-      return "BreezeAndPit";
-    case CellType.SmellAndPit:
-      return "SmellAndPit";
-    case CellType.LightAndPit:
-      return "LightAndPit";
-    case CellType.Smell_Breeze_And_Light:
-      return "light_smell_breeze"
-    default:
-      return "Unknown";
-  }
-}
+import { GenerateGameService } from 'src/app/services/generate-game.service';
+import { AIService } from 'src/app/services/ai.service';
 
 
 @Component({
@@ -47,120 +14,57 @@ function getCellTypeString(cellType: CellType): string {
 })
 export class BoardComponent implements OnInit {
 
-  constructor( private dialog: MatDialog){}
+  constructor(private dialog: MatDialog,
+    private generateGame: GenerateGameService,
+    private AI: AIService) { }
+
   board: Cell[][] = [];
   exploredBoard: Cell[][] = [];
   player: Player = new Player();
-
   availableMoves: { row: number; col: number }[] = [];
-  moveMode: boolean = false;
 
 
   ngOnInit(): void {
-    this.player.position = { row: 0, col: 0 };
+    this.player = new Player();
     this.initializeBoard();
-    this.placePitsWumpusTreasure();
+    this.board = this.generateGame.getBoard();
+    this.generateGame.placePitsWumpusTreasure();  //get a board
+    this.AI.makeAIMove(); // not implemented yet
 
   }
 
+
+
   initializeBoard(): void {
-    this.board = [];
+    this.generateGame.board = [];
     this.exploredBoard = [];
     for (let row = 0; row < 10; row++) {
       const newRow: Cell[] = [];
       for (let col = 0; col < 10; col++) {
         newRow.push({
           type: CellType.Empty,
-          isCovered: true,
+          isVisited: true,
           hasBreeze: false,
           hasSmell: false,
           hasLight: false,
-          score: 0
+          flag_score: 0
         });
       }
-      this.board.push(newRow);
+      this.generateGame.board.push(newRow);
       this.exploredBoard.push(newRow);
     }
-    this.board[0][0].isCovered = false;
-    this.exploredBoard[0][0] = this.board[0][0];
+    this.generateGame.board[0][0].isVisited = false;
+    this.exploredBoard[0][0] = this.generateGame.board[0][0];
 
     this.availableMoves = this.calculateAdjacentCells();
-  }
-
-  revealCell(rowIndex: number, colIndex: number): void {
-    console.log(getCellTypeString(this.board[rowIndex][colIndex].type));
-    if (this.isMoveAvailable(rowIndex, colIndex)) {
-      this.board[rowIndex][colIndex].isCovered = false;
-      this.player.position = { row: rowIndex, col: colIndex };
-      this.availableMoves = this.calculateAdjacentCells();
-      this.exploredBoard[rowIndex][colIndex] = this.board[rowIndex][colIndex];
-
-      this.updateScore(rowIndex, colIndex);
-    }
-  }
-
-  isMoveAvailable(rowIndex: number, colIndex: number): boolean {
-    const adjacentCells = this.calculateAdjacentCells();
-    return adjacentCells.some(
-      (move) => move.row === rowIndex && move.col === colIndex
-    );
-  }
-
-  isCellAvailableMove(rowIndex: number, colIndex: number): boolean {
-    return this.availableMoves.some(
-      (move) => move.row === rowIndex && move.col === colIndex
-    );
-  }
-
-  calculateAdjacentCells(): { row: number; col: number }[] {
-    const { row, col } = this.player.position;
-    const adjacentCells = [
-      { row: row - 1, col },
-      { row: row + 1, col },
-      { row, col: col - 1 },
-      { row, col: col + 1 },
-    ];
-
-    return adjacentCells.filter(
-      (cell) =>
-        cell.row >= 0 &&
-        cell.row < this.board.length &&
-        cell.col >= 0 &&
-        cell.col < this.board[0].length
-    );
-  }
-
-
-
-  //Generate game
-  placePitsWumpusTreasure(): void {
-    this.placeRandomElements(CellType.Pit, 5); // Place 5 pits
-    this.placeRandomElements(CellType.Wumpus, 1); // Place 1 Wumpus
-    this.placeRandomElements(CellType.Treasure, 1); // Place 1 treasure
-  }
-
-  placeRandomElements(elementType: CellType, count: number): void {
-    for (let i = 0; i < count; i++) {
-      let rowIndex: number;
-      let colIndex: number;
-      do {
-        rowIndex = Math.floor(Math.random() * this.board.length);
-        colIndex = Math.floor(Math.random() * this.board[0].length);
-      } while (
-        this.board[rowIndex][colIndex].type !== CellType.Empty ||
-        (rowIndex === 0 && colIndex === 0)
-      );
-
-      this.board[rowIndex][colIndex].type = elementType;
-    }
-
-    this.calculateBreezeSmellAndLight();
   }
 
   getCellImage(cellType: CellType): string {
     switch (cellType) {
       case CellType.Wumpus:
         return 'assets/wumpus.png';
+      case CellType.DeadWumpus:
+        return 'assets/deadWumpus.png';
       case CellType.Pit:
         return 'assets/hole.png';
       case CellType.Breeze:
@@ -189,153 +93,95 @@ export class BoardComponent implements OnInit {
     }
   }
 
-  calculateBreezeSmellAndLight(): void {
-    this.generateCellTypes(CellType.Pit);
-    this.generateCellTypes(CellType.Wumpus);
-    this.generateCellTypes(CellType.Treasure);
+  revealCell(rowIndex: number, colIndex: number): void {
+    console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
+
+    if(!this.gameOver() && this.isMoveAvailable(rowIndex, colIndex)){    
+        this.generateGame.board[rowIndex][colIndex].isVisited = false;
+        this.player.position = { row: rowIndex, col: colIndex };
+        this.availableMoves = this.calculateAdjacentCells();
+        this.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
+  
+        this.updateScore(rowIndex, colIndex);
+      
+    }
+
+   
   }
 
-  generateCellTypes(sourceType: CellType): void {
-    const offsets = [
-      { row: -1, col: 0 }, // Up
-      { row: 1, col: 0 },  // Down
-      { row: 0, col: -1 }, // Left
-      { row: 0, col: 1 },  // Right
+  isMoveAvailable(rowIndex: number, colIndex: number): boolean {
+    const adjacentCells = this.calculateAdjacentCells();
+    return adjacentCells.some(
+      (move) => move.row === rowIndex && move.col === colIndex
+    );
+  }
+
+  calculateAdjacentCells(): { row: number; col: number }[] {
+    const { row, col } = this.player.position;
+    const adjacentCells = [
+      { row: row - 1, col },
+      { row: row + 1, col },
+      { row, col: col - 1 },
+      { row, col: col + 1 },
     ];
 
-    for (let rowIndex = 0; rowIndex < this.board.length; rowIndex++) {
-      for (let colIndex = 0; colIndex < this.board[rowIndex].length; colIndex++) {
-        if (this.board[rowIndex][colIndex].type === sourceType) {
-          for (const offset of offsets) {
-            const adjacentRow = rowIndex + offset.row;
-            const adjacentCol = colIndex + offset.col;
-
-            if (
-              adjacentRow >= 0 && adjacentRow < this.board.length &&
-              adjacentCol >= 0 && adjacentCol < this.board[0].length
-            ) {
-              const adjacentCell = this.board[adjacentRow][adjacentCol];
-
-              // Handle target types based on source type
-              switch (sourceType) {
-                case CellType.Pit:
-                  this.handlePitTargetTypes(adjacentCell);
-                  break;
-                case CellType.Wumpus:
-                  this.handleWumpusTargetTypes(adjacentCell);
-                  break;
-                case CellType.Treasure:
-                  this.handleTreasureTargetTypes(adjacentCell);
-                  break;
-                // Add cases for other source types if needed
-              }
-            }
-          }
-        }
-      }
-    }
+    return adjacentCells.filter(
+      (cell) =>
+        cell.row >= 0 &&
+        cell.row < this.generateGame.board.length &&
+        cell.col >= 0 &&
+        cell.col < this.generateGame.board[0].length
+    );
   }
 
-  handlePitTargetTypes(cell: Cell): void {
-    // Handle target types for Pit source
-    switch (cell.type) {
-      case CellType.Empty:
-        cell.type = CellType.Breeze;
-        cell.hasBreeze = true;
-        break;
-      case CellType.Smell:
-        cell.type = CellType.BreezeAndSmell;
-        cell.hasBreeze = true;
-        break;
-      case CellType.Light:
-        cell.type = CellType.BreezeAndLight;
-        cell.hasBreeze = true;
-        break;
-      case CellType.SmellAndLight:
-        cell.type = CellType.Smell_Breeze_And_Light;
-        cell.hasBreeze = true;
-        break;
-      case CellType.Treasure:
-        // If a pit is adjacent to treasure, it doesn't change to Light
-        cell.type = CellType.BreezeAndLight;
-        cell.hasBreeze = true;
-        break;
-    }
-  }
 
-  handleWumpusTargetTypes(cell: Cell): void {
-    // Handle target types for Wumpus source
-    switch (cell.type) {
-      case CellType.Empty:
-        cell.type = CellType.Smell;
-        cell.hasSmell = true;
-        break;
-      case CellType.Breeze:
-        cell.type = CellType.BreezeAndSmell;
-        cell.hasSmell = true;
-        break;
-      case CellType.Light:
-        cell.type = CellType.SmellAndLight;
-        cell.hasSmell = true;
-        break;
-      case CellType.BreezeAndLight:
-        cell.type = CellType.Smell_Breeze_And_Light;
-        cell.hasSmell = true;
-        break;
-
-    }
-  }
-
-  handleTreasureTargetTypes(cell: Cell): void {
-    // Handle target types for Treasure source
-    switch (cell.type) {
-      case CellType.Empty:
-        cell.type = CellType.Light;
-        break;
-      case CellType.Breeze:
-        cell.type = CellType.BreezeAndLight;
-        break;
-      case CellType.Smell:
-        cell.type = CellType.SmellAndLight;
-        break;
-      case CellType.BreezeAndSmell:
-        cell.type = CellType.Smell_Breeze_And_Light;
-        break;
-      case CellType.Pit:
-        // If a pit is adjacent to treasure, don't change it to Light
-        break;
-      default:
-      // Add cases for other target types if needed
-    }
-  }
 
   shootArrow(row: number, col: number) {
-    this.player.hasArrow = false;
-    this.player.point -= 10;
-    this.board[row][col].isCovered = false;
-    this.exploredBoard[row][col] = this.board[row][col];
+    if (this.player.hasArrow) {
+      this.player.hasArrow = false;
+      this.player.point -= 10;
+      this.generateGame.board[row][col].isVisited = false;
+      this.exploredBoard[row][col] = this.generateGame.board[row][col];
+      // console.log( this.board[row][col].type);
 
-    if (this.board[row][col].type == CellType.Wumpus) {
-      //kill wumpus and score
+      if (this.generateGame.board[row][col].type === CellType.Wumpus) {
+        alert("You killed the wumpus!");
+        this.generateGame.board[row][col].type = CellType.DeadWumpus;
+
+        //kill wumpus logic
+      }
+      else {
+        alert("There wasn't any wumpus here.");
+      }
     }
+
+    else {
+      alert('You have no arrow left')
+    }
+
   }
 
   updateScore(row: number, col: number) {
     this.player.point -= 1;
 
-    if (this.board[row][col].type == CellType.Treasure)
+    if (this.generateGame.board[row][col].type == CellType.Treasure) {
       this.player.point += 1000;
-      else if (this.board[row][col].type == CellType.Wumpus) {
-        this.player.point -= 1000;
-        this.showMessage("Wumpus found you. Game over")
-       //Game Over
-      }
-    else if (this.board[row][col].type == CellType.Pit 
-      || this.board[row][col].type == CellType.BreezeAndPit 
-      || this.board[row][col].type == CellType.SmellAndPit 
-      || this.board[row][col].type == CellType.LightAndPit) {
+      this.showMessage("Congratulations! You found the Treasure.")
+    }
+
+    else if (this.generateGame.board[row][col].type == CellType.Wumpus) {
       this.player.point -= 1000;
-      this.player.position = { row: 0, col: 0 };
+      this.showMessage("Oops! Wumpus found you. Game over")
+      //Game Over
+    }
+    else if (this.generateGame.board[row][col].type == CellType.Pit
+      || this.generateGame.board[row][col].type == CellType.BreezeAndPit
+      || this.generateGame.board[row][col].type == CellType.SmellAndPit
+      || this.generateGame.board[row][col].type == CellType.LightAndPit) {
+      this.player.point -= 1000;
+      this.showMessage("Oops! You fell on a pit. Game over")
+      // alert('You fell on a pit!');
+      // this.player.position = { row: 0, col: 0 };
     }
 
   }
@@ -350,4 +196,52 @@ export class BoardComponent implements OnInit {
       window.location.reload();
     });
   }
+
+  getCellTypeString(cellType: CellType): string {
+    switch (cellType) {
+      case CellType.Empty:
+        return "Empty";
+      case CellType.Wumpus:
+        return "Wumpus";
+      case CellType.Pit:
+        return "Pit";
+      case CellType.Treasure:
+        return "Treasure";
+      case CellType.Breeze:
+        return "Breeze";
+      case CellType.Smell:
+        return "Smell";
+      case CellType.Light:
+        return "Light";
+      case CellType.BreezeAndSmell:
+        return "BreezeAndSmell";
+      case CellType.BreezeAndLight:
+        return "BreezeAndLight";
+      case CellType.SmellAndLight:
+        return "SmellAndLight";
+      case CellType.BreezeAndPit:
+        return "BreezeAndPit";
+      case CellType.SmellAndPit:
+        return "SmellAndPit";
+      case CellType.LightAndPit:
+        return "LightAndPit";
+      case CellType.Smell_Breeze_And_Light:
+        return "light_smell_breeze"
+      default:
+        return "Unknown";
+    }
+  }
+
+  gameOver() : boolean{
+    if(this.player.point<=0){    
+      this.showMessage('Sorry. No moves left. Game Over.');
+      return true;
+    }
+     
+    else{
+      return false;
+    }
+     
+  }
+
 }
