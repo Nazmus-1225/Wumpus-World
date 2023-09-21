@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GenerateGameService } from './generate-game.service';
 import { Player } from '../models/player.model';
+import { Cell, CellType } from 'src/app/models/cell';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ export class AIService {
   randomRow: number = 0;
   randomCol: number = 0;
   player: Player = new Player();
+  availableCells: Cell[]=[];
   availableMoves: { row: number; col: number }[] = [];
 
   makeAIMove(): { row: number, column: number } {
@@ -27,7 +29,29 @@ export class AIService {
       return { row: -1, column: -1 }; 
     }
   }
+  shootArrow(row: number, col: number) {
+    if (this.player.hasArrow) {
+      this.player.hasArrow = false;
+      this.player.point -= 10;
+      console.log("shoot");
+      this.generateGame.board[row][col].isVisited = false;
+     // this.exploredBoard[row][col] = this.generateGame.board[row][col];
+      // console.log( this.board[row][col].type);
 
+      if (this.generateGame.board[row][col].type === CellType.Wumpus) {
+        alert("You killed the wumpus!");
+        this.generateGame.board[row][col].type = CellType.DeadWumpus;
+      }
+      else {
+        alert("There wasn't any wumpus here.");
+      }
+    }
+
+    else {
+      alert('You have no arrow left')
+    }
+
+  }
   calculateAdjacentCells(): { row: number; col: number }[] {
     const { row, col } = this.player.position;
     const adjacentCells = [

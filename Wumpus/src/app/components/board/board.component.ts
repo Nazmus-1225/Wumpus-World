@@ -32,17 +32,39 @@ export class BoardComponent implements OnInit {
 
   }
 
+  // playGame(){
+  //   const gameInterval = setInterval(() => {
+  //     if (!this.gameOver()) {
+  //       const { row, column } = this.AI.makeAIMove();
+  //       this.revealCell(row, column);
+  //     } else {
+  //       // clearInterval(gameInterval); 
+  //       window.location.reload();
+  //     }
+  //   }, 1000);
+  // }
   playGame(){
     const gameInterval = setInterval(() => {
       if (!this.gameOver()) {
         const { row, column } = this.AI.makeAIMove();
-        this.revealCell(row, column);
+  
+        // Randomly decide if AI should move or shoot arrow
+        const shouldShootArrow = Math.random() < 0.5; // ekahne hocche logic thakbe kokhon shoot korbe
+  
+        if (shouldShootArrow) {
+          // AI decided to shoot an arrow
+          this.AI.shootArrow(row, column); // You may need to provide valid row and column here
+        } else {
+          // AI decided to make a move
+          this.revealCell(row, column);
+        }
       } else {
-        // clearInterval(gameInterval); 
+        clearInterval(gameInterval);
         window.location.reload();
       }
     }, 1000);
   }
+  
 
 
   initializeBoard(): void {
@@ -125,28 +147,9 @@ export class BoardComponent implements OnInit {
   }
 
 
-  shootArrow(row: number, col: number) {
-    if (this.AI.player.hasArrow) {
-      this.AI.player.hasArrow = false;
-      this.AI.player.point -= 10;
-      this.generateGame.board[row][col].isVisited = false;
-      this.exploredBoard[row][col] = this.generateGame.board[row][col];
-      // console.log( this.board[row][col].type);
-
-      if (this.generateGame.board[row][col].type === CellType.Wumpus) {
-        alert("You killed the wumpus!");
-        this.generateGame.board[row][col].type = CellType.DeadWumpus;
-      }
-      else {
-        alert("There wasn't any wumpus here.");
-      }
-    }
-
-    else {
-      alert('You have no arrow left')
-    }
-
-  }
+shootArrow(row: number, col: number) {
+  this.AI.shootArrow(row, col);
+}
 
   updateScore(row: number, col: number) {
     this.player.point=this.AI.player.point -= 1;
