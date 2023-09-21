@@ -7,7 +7,7 @@
       >
       
       <div class="image-container">
-        <div class="cell treasure-highlight overlay-image" *ngIf="!cell.isCovered && cell.isAdjacentToTreasure"></div>
+        <div class="cell treasure-highlight overlay-image" *ngIf="!cell.isCovered && cell.hasLight"></div>
         <img *ngIf="!cell.isCovered || (rowIndex === playerPosition.row && colIndex === playerPosition.col)"
           [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
         <img *ngIf="cell.isCovered" src="assets/brick.png" alt="Brick" class="cell-image" />

@@ -1,21 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Cell, CellType } from 'src/app/models/cell';
 
-enum CellType {
-  Empty,
-  Wumpus,
-  Pit,
-  Treasure,
-  Breeze,
-  Smell,
-  Light,
-  BreezeAndSmell,
-  BreezeAndLight,
-  SmellAndLight,
-  BreezeAndPit,
-  SmellAndPit,
-  LightAndPit,
-  Smell_Breeze_And_Light //yet to implement
-}
 function getCellTypeString(cellType: CellType): string {
   switch (cellType) {
     case CellType.Empty:
@@ -44,17 +29,13 @@ function getCellTypeString(cellType: CellType): string {
       return "SmellAndPit";
     case CellType.LightAndPit:
       return "LightAndPit";
+    case CellType.Smell_Breeze_And_Light:
+      return "light_smell_breeze"
     default:
       return "Unknown";
   }
 }
-interface Cell {
-  type: CellType;
-  isCovered: boolean;
-  hasBreeze: boolean;
-  hasSmell: boolean;
-  isAdjacentToTreasure: boolean;
-}
+
 
 @Component({
   selector: 'app-board',
@@ -63,10 +44,10 @@ interface Cell {
 })
 export class BoardComponent implements OnInit {
   board: Cell[][] = [];
+  exploredBoard: Cell[][] = [];
   playerPosition: { row: number; col: number; } = { row: 0, col: 0 };
 
   availableMoves: { row: number; col: number }[] = [];
-  highlightedCells: { row: number; col: number }[] = [];
   moveMode: boolean = false;
 
 
@@ -79,19 +60,26 @@ export class BoardComponent implements OnInit {
 
   initializeBoard(): void {
     this.board = [];
+    this.exploredBoard = [];
     for (let row = 0; row < 10; row++) {
       const newRow: Cell[] = [];
       for (let col = 0; col < 10; col++) {
         newRow.push({
-          type: CellType.Empty, isCovered: true, hasBreeze: false, hasSmell: false,
-          isAdjacentToTreasure: false,
-
+          type: CellType.Empty,
+          isCovered: true,
+          hasBreeze: false,
+          hasSmell: false,
+          hasLight: false,
+          score: 0
         });
       }
       this.board.push(newRow);
+      this.exploredBoard.push(newRow);
     }
     this.board[0][0].isCovered = false;
-    this.calculateAvailableMoves();
+    this.exploredBoard[0][0] = this.board[0][0];
+
+    this.availableMoves = this.calculateAdjacentCells();
   }
 
   revealCell(rowIndex: number, colIndex: number): void {
@@ -99,7 +87,8 @@ export class BoardComponent implements OnInit {
     if (this.isMoveAvailable(rowIndex, colIndex)) {
       this.board[rowIndex][colIndex].isCovered = false;
       this.playerPosition = { row: rowIndex, col: colIndex };
-      this.calculateAvailableMoves();
+      this.availableMoves = this.calculateAdjacentCells();
+      this.exploredBoard[rowIndex][colIndex] = this.board[rowIndex][colIndex];
     }
   }
 
@@ -134,20 +123,15 @@ export class BoardComponent implements OnInit {
     );
   }
 
-  calculateAvailableMoves(): void {
-    this.availableMoves = this.calculateAdjacentCells();
-  }
-
-
-  placePitsWumpusTreasure(): void {
-    this.placeRandomElements(CellType.Pit, 5); // Place 5 pits
-    this.placeRandomElements(CellType.Wumpus, 5); // Place 1 Wumpus
-    this.placeRandomElements(CellType.Treasure, 5); // Place 1 treasure
-  }
-
 
 
   //Generate game
+  placePitsWumpusTreasure(): void {
+    this.placeRandomElements(CellType.Pit, 5); // Place 5 pits
+    this.placeRandomElements(CellType.Wumpus, 1); // Place 1 Wumpus
+    this.placeRandomElements(CellType.Treasure, 1); // Place 1 treasure
+  }
+
   placeRandomElements(elementType: CellType, count: number): void {
     for (let i = 0; i < count; i++) {
       let rowIndex: number;
@@ -165,7 +149,6 @@ export class BoardComponent implements OnInit {
 
     this.calculateBreezeSmellAndLight();
   }
-
 
   getCellImage(cellType: CellType): string {
     switch (cellType) {
@@ -189,12 +172,16 @@ export class BoardComponent implements OnInit {
         return 'assets/LightAndBreeze.jpg';
       case CellType.SmellAndLight:
         return 'assets/LightAndSmell.jpg';
+      case CellType.Smell_Breeze_And_Light:
+        return 'assets/light_smell_breeze.jpg';
       case CellType.Empty:
         return 'assets/bg.png';
+
       default:
         return '';
     }
   }
+
   calculateBreezeSmellAndLight(): void {
     this.generateCellTypes(CellType.Pit);
     this.generateCellTypes(CellType.Wumpus);
@@ -257,16 +244,17 @@ export class BoardComponent implements OnInit {
         cell.type = CellType.BreezeAndLight;
         cell.hasBreeze = true;
         break;
-      case CellType.Treasure:
-        // If a pit is adjacent to treasure, it doesn't change to Light
-        cell.type = CellType.BreezeAndLight; // Add this line to handle BreezeAndLight
+      case CellType.SmellAndLight:
+        cell.type = CellType.Smell_Breeze_And_Light;
         cell.hasBreeze = true;
         break;
-      default:
-      // Add cases for other target types if needed
+      case CellType.Treasure:
+        // If a pit is adjacent to treasure, it doesn't change to Light
+        cell.type = CellType.BreezeAndLight;
+        cell.hasBreeze = true;
+        break;
     }
   }
-
 
   handleWumpusTargetTypes(cell: Cell): void {
     // Handle target types for Wumpus source
@@ -283,7 +271,11 @@ export class BoardComponent implements OnInit {
         cell.type = CellType.SmellAndLight;
         cell.hasSmell = true;
         break;
-      // Add cases for other target types if needed
+      case CellType.BreezeAndLight:
+        cell.type = CellType.Smell_Breeze_And_Light;
+        cell.hasSmell = true;
+        break;
+
     }
   }
 
@@ -298,6 +290,9 @@ export class BoardComponent implements OnInit {
         break;
       case CellType.Smell:
         cell.type = CellType.SmellAndLight;
+        break;
+      case CellType.BreezeAndSmell:
+        cell.type = CellType.Smell_Breeze_And_Light;
         break;
       case CellType.Pit:
         // If a pit is adjacent to treasure, don't change it to Light

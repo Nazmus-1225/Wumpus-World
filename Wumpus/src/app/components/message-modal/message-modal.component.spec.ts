@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TempComponent } from './temp.component';
+import { MessageModalComponent } from './message-modal.component';
 
-describe('TempComponent', () => {
-  let component: TempComponent;
-  let fixture: ComponentFixture<TempComponent>;
+describe('MessageModalComponent', () => {
+  let component: MessageModalComponent;
+  let fixture: ComponentFixture<MessageModalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TempComponent ]
+      declarations: [ MessageModalComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TempComponent);
+    fixture = TestBed.createComponent(MessageModalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
