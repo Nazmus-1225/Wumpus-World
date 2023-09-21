@@ -17,11 +17,10 @@ export enum CellType {
   }
 export interface Cell {
     type: CellType;
-    position: { row: number; column: number };
+    position: { row: number; col: number } ;
     isVisited: boolean;
     hasBreeze: boolean;
     hasSmell: boolean;
     hasLight: boolean;
     flag_score: number;
   }
-

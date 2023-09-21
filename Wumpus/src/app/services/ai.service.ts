@@ -2,13 +2,11 @@ import { Injectable } from '@angular/core';
 import { GenerateGameService } from './generate-game.service';
 import { Player } from '../models/player.model';
 import { Cell, CellType } from 'src/app/models/cell';
-
 @Injectable({
   providedIn: 'root'
 })
 export class AIService {
   aiInterval: number =1000;
-
   constructor(
     private generateGame: GenerateGameService
   ) { }
@@ -16,8 +14,6 @@ export class AIService {
   randomCol: number = 0;
   player: Player = new Player();
   availableCells: Cell[]=[];
- // availableMoves: { row: number; col: number }[] = [];
-
   makeAIMove(): { row: number, column: number } {
     if (this.availableCells.length > 0) {
       const randomIndex = Math.floor(Math.random() * this.availableCells.length);
@@ -35,42 +31,36 @@ export class AIService {
       this.player.point -= 10;
       console.log("shoot");
       this.generateGame.board[row][col].isVisited = false;
+     // this.exploredBoard[row][col] = this.generateGame.board[row][col];
+      // console.log( this.board[row][col].type);
     //  this.exploredBoard[row][col] = this.generateGame.board[row][col];
     //   console.log( this.board[row][col].type);
-
-      if (this.generateGame.board[row][col].type === CellType.Wumpus) {
-        alert("You killed the wumpus!");
-        this.generateGame.board[row][col].type = CellType.DeadWumpus;
-      }
-      else {
-        alert("There wasn't any wumpus here.");
-      }
+    if (this.generateGame.board[row][col].type === CellType.Wumpus) {
+      alert("You killed the wumpus!");
+      this.generateGame.board[row][col].type = CellType.DeadWumpus;
     }
-
     else {
-      alert('You have no arrow left')
+      alert("There wasn't any wumpus here.");
     }
-
   }
-  calculateAdjacentCells(): { row: number; col: number }[] {
-    const { row, col } = this.player.position;
-    const adjacentCells = [
-      { row: row - 1, col },
-      { row: row + 1, col },
-      { row, col: col - 1 },
-      { row, col: col + 1 },
-    ];
-
-    return adjacentCells.filter(
-      (cell) =>
-        cell.row >= 0 &&
-        cell.row < this.generateGame.board.length &&
-        cell.col >= 0 &&
-        cell.col < this.generateGame.board[0].length
-    );
+  else {
+    alert('You have no arrow left')
   }
-
 }
-
-
-
+calculateAdjacentCells(): { row: number; col: number }[] {
+  const { row, col } = this.player.position;
+  const adjacentCells = [
+    { row: row - 1, col },
+    { row: row + 1, col },
+    { row, col: col - 1 },
+    { row, col: col + 1 },
+  ];
+  return adjacentCells.filter(
+    (cell) =>
+      cell.row >= 0 &&
+      cell.row < this.generateGame.board.length &&
+      cell.col >= 0 &&
+      cell.col < this.generateGame.board[0].length
+  );
+}
+}
