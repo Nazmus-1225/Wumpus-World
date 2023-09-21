@@ -72,8 +72,7 @@ export class BoardComponent implements OnInit {
           hasSmell: false,
           hasLight: false,
           flag_score: 0
-        };
-        newRow.push(newCell);
+        });
       }
       this.generateGame.board.push(newRow);
       this.exploredBoard.push(newRow);

@@ -17,7 +17,7 @@ export enum CellType {
   }
 export interface Cell {
     type: CellType;
-    position: { row: number; col: number } ;
+    position: { row: number; column: number };
     isVisited: boolean;
     hasBreeze: boolean;
     hasSmell: boolean;
