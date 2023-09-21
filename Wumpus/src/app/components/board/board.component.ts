@@ -21,18 +21,28 @@ export class BoardComponent implements OnInit {
   board: Cell[][] = [];
   exploredBoard: Cell[][] = [];
   player: Player = new Player();
-  availableMoves: { row: number; col: number }[] = [];
 
 
   ngOnInit(): void {
-    this.player = new Player();
+    //  this.player = this.AI.player;
     this.initializeBoard();
     this.board = this.generateGame.getBoard();
     this.generateGame.placePitsWumpusTreasure();  //get a board
-    this.AI.makeAIMove(); // not implemented yet
+    this.playGame(); // not implemented yet
 
   }
 
+  playGame(){
+    const gameInterval = setInterval(() => {
+      if (!this.gameOver()) {
+        const { row, column } = this.AI.makeAIMove();
+        this.revealCell(row, column);
+      } else {
+        // clearInterval(gameInterval); 
+        window.location.reload();
+      }
+    }, 1000);
+  }
 
 
   initializeBoard(): void {
@@ -56,7 +66,7 @@ export class BoardComponent implements OnInit {
     this.generateGame.board[0][0].isVisited = false;
     this.exploredBoard[0][0] = this.generateGame.board[0][0];
 
-    this.availableMoves = this.calculateAdjacentCells();
+    this.AI.availableMoves = this.AI.calculateAdjacentCells();
   }
 
   getCellImage(cellType: CellType): string {
@@ -98,48 +108,27 @@ export class BoardComponent implements OnInit {
 
     if(!this.gameOver() && this.isMoveAvailable(rowIndex, colIndex)){    
         this.generateGame.board[rowIndex][colIndex].isVisited = false;
-        this.player.position = { row: rowIndex, col: colIndex };
-        this.availableMoves = this.calculateAdjacentCells();
+        this.player.position=this.AI.player.position = { row: rowIndex, col: colIndex };
+
+        this.AI.availableMoves = this.AI.calculateAdjacentCells();
         this.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
   
         this.updateScore(rowIndex, colIndex);
-      
-    }
-
-   
+    }  
   }
 
   isMoveAvailable(rowIndex: number, colIndex: number): boolean {
-    const adjacentCells = this.calculateAdjacentCells();
+    const adjacentCells = this.AI.calculateAdjacentCells();
     return adjacentCells.some(
       (move) => move.row === rowIndex && move.col === colIndex
     );
   }
 
-  calculateAdjacentCells(): { row: number; col: number }[] {
-    const { row, col } = this.player.position;
-    const adjacentCells = [
-      { row: row - 1, col },
-      { row: row + 1, col },
-      { row, col: col - 1 },
-      { row, col: col + 1 },
-    ];
-
-    return adjacentCells.filter(
-      (cell) =>
-        cell.row >= 0 &&
-        cell.row < this.generateGame.board.length &&
-        cell.col >= 0 &&
-        cell.col < this.generateGame.board[0].length
-    );
-  }
-
-
 
   shootArrow(row: number, col: number) {
-    if (this.player.hasArrow) {
-      this.player.hasArrow = false;
-      this.player.point -= 10;
+    if (this.AI.player.hasArrow) {
+      this.AI.player.hasArrow = false;
+      this.AI.player.point -= 10;
       this.generateGame.board[row][col].isVisited = false;
       this.exploredBoard[row][col] = this.generateGame.board[row][col];
       // console.log( this.board[row][col].type);
@@ -147,8 +136,6 @@ export class BoardComponent implements OnInit {
       if (this.generateGame.board[row][col].type === CellType.Wumpus) {
         alert("You killed the wumpus!");
         this.generateGame.board[row][col].type = CellType.DeadWumpus;
-
-        //kill wumpus logic
       }
       else {
         alert("There wasn't any wumpus here.");
@@ -162,15 +149,15 @@ export class BoardComponent implements OnInit {
   }
 
   updateScore(row: number, col: number) {
-    this.player.point -= 1;
+    this.player.point=this.AI.player.point -= 1;
 
     if (this.generateGame.board[row][col].type == CellType.Treasure) {
-      this.player.point += 1000;
+      this.player.point=this.AI.player.point += 1000;
       this.showMessage("Congratulations! You found the Treasure.")
     }
 
     else if (this.generateGame.board[row][col].type == CellType.Wumpus) {
-      this.player.point -= 1000;
+      this.player.point=this.AI.player.point -= 1000;
       this.showMessage("Oops! Wumpus found you. Game over")
       //Game Over
     }
@@ -178,7 +165,7 @@ export class BoardComponent implements OnInit {
       || this.generateGame.board[row][col].type == CellType.BreezeAndPit
       || this.generateGame.board[row][col].type == CellType.SmellAndPit
       || this.generateGame.board[row][col].type == CellType.LightAndPit) {
-      this.player.point -= 1000;
+        this.player.point=this.AI.player.point -= 1000;
       this.showMessage("Oops! You fell on a pit. Game over")
       // alert('You fell on a pit!');
       // this.player.position = { row: 0, col: 0 };
@@ -233,7 +220,7 @@ export class BoardComponent implements OnInit {
   }
 
   gameOver() : boolean{
-    if(this.player.point<=0){    
+    if(this.AI.player.point<=0){    
       this.showMessage('Sorry. No moves left. Game Over.');
       return true;
     }
