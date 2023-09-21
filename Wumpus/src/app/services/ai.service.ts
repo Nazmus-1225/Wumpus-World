@@ -16,14 +16,14 @@ export class AIService {
   randomCol: number = 0;
   player: Player = new Player();
   availableCells: Cell[]=[];
-  availableMoves: { row: number; col: number }[] = [];
+ // availableMoves: { row: number; col: number }[] = [];
 
   makeAIMove(): { row: number, column: number } {
-    if (this.availableMoves.length > 0) {
-      const randomIndex = Math.floor(Math.random() * this.availableMoves.length);
-      const randomMove = this.availableMoves[randomIndex];
-
-      return { row: randomMove.row, column: randomMove.col };
+    if (this.availableCells.length > 0) {
+      const randomIndex = Math.floor(Math.random() * this.availableCells.length);
+      const randomCell = this.availableCells[randomIndex];
+  
+      return { row: randomCell.position.row, column: randomCell.position.col };
     } else {
       clearInterval(this.aiInterval);
       return { row: -1, column: -1 }; 
@@ -35,8 +35,8 @@ export class AIService {
       this.player.point -= 10;
       console.log("shoot");
       this.generateGame.board[row][col].isVisited = false;
-     // this.exploredBoard[row][col] = this.generateGame.board[row][col];
-      // console.log( this.board[row][col].type);
+    //  this.exploredBoard[row][col] = this.generateGame.board[row][col];
+    //   console.log( this.board[row][col].type);
 
       if (this.generateGame.board[row][col].type === CellType.Wumpus) {
         alert("You killed the wumpus!");

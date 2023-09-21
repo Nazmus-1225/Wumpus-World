@@ -32,24 +32,14 @@ export class BoardComponent implements OnInit {
 
   }
 
-  // playGame(){
-  //   const gameInterval = setInterval(() => {
-  //     if (!this.gameOver()) {
-  //       const { row, column } = this.AI.makeAIMove();
-  //       this.revealCell(row, column);
-  //     } else {
-  //       // clearInterval(gameInterval); 
-  //       window.location.reload();
-  //     }
-  //   }, 1000);
-  // }
+
   playGame(){
     const gameInterval = setInterval(() => {
       if (!this.gameOver()) {
         const { row, column } = this.AI.makeAIMove();
   
         // Randomly decide if AI should move or shoot arrow
-        const shouldShootArrow = Math.random() < 0.5; // ekahne hocche logic thakbe kokhon shoot korbe
+        const shouldShootArrow = Math.random() < 0.2; // ekahne hocche logic thakbe kokhon shoot korbe
   
         if (shouldShootArrow) {
           // AI decided to shoot an arrow
@@ -70,27 +60,36 @@ export class BoardComponent implements OnInit {
   initializeBoard(): void {
     this.generateGame.board = [];
     this.exploredBoard = [];
+  
     for (let row = 0; row < 10; row++) {
       const newRow: Cell[] = [];
       for (let col = 0; col < 10; col++) {
-        newRow.push({
+        const newCell: Cell = {
           type: CellType.Empty,
+          position: { row: row, col: col },
           isVisited: true,
           hasBreeze: false,
           hasSmell: false,
           hasLight: false,
           flag_score: 0
-        });
+        };
+        newRow.push(newCell);
       }
       this.generateGame.board.push(newRow);
       this.exploredBoard.push(newRow);
     }
+  
     this.generateGame.board[0][0].isVisited = false;
     this.exploredBoard[0][0] = this.generateGame.board[0][0];
-
-    this.AI.availableMoves = this.AI.calculateAdjacentCells();
+  
+    // Convert an array of { row: number; col: number; } objects into an array of Cell objects
+    const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
+      return this.generateGame.board[position.row][position.col];
+    });
+  
+    this.AI.availableCells = adjacentCells;
   }
-
+  
   getCellImage(cellType: CellType): string {
     switch (cellType) {
       case CellType.Wumpus:
@@ -127,18 +126,23 @@ export class BoardComponent implements OnInit {
 
   revealCell(rowIndex: number, colIndex: number): void {
     console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
-
-    if(!this.gameOver() && this.isMoveAvailable(rowIndex, colIndex)){    
-        this.generateGame.board[rowIndex][colIndex].isVisited = false;
-        this.player.position=this.AI.player.position = { row: rowIndex, col: colIndex };
-
-        this.AI.availableMoves = this.AI.calculateAdjacentCells();
-        this.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
   
-        this.updateScore(rowIndex, colIndex);
-    }  
+    if (!this.gameOver() && this.isMoveAvailable(rowIndex, colIndex)) {
+      this.generateGame.board[rowIndex][colIndex].isVisited = false;
+      this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
+  
+      // Convert an array of { row: number; col: number; } objects into an array of Cell objects
+      const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
+        return this.generateGame.board[position.row][position.col];
+      });
+  
+      this.AI.availableCells = adjacentCells;
+  
+      this.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
+      this.updateScore(rowIndex, colIndex);
+    }
   }
-
+  
   isMoveAvailable(rowIndex: number, colIndex: number): boolean {
     const adjacentCells = this.AI.calculateAdjacentCells();
     return adjacentCells.some(
