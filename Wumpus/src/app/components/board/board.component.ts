@@ -57,7 +57,11 @@ export class BoardComponent implements OnInit {
           hasBreeze: false,
           hasSmell: false,
           hasLight: false,
-          flag_score: 0
+          flag_score: 0,
+          position: {
+            row: row,
+            column: col
+          }
         });
       }
       this.generateGame.board.push(newRow);
