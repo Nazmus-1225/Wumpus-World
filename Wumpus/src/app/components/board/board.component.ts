@@ -64,7 +64,7 @@ export class BoardComponent implements OnInit {
       const newRow: Cell[] = [];
       for (let col = 0; col < 10; col++) {const newCell: Cell = {
         type: CellType.Empty,
-        position: { row: row, col: col },
+        position: { row: row, column: col },
         isVisited: true,
         hasBreeze: false,
         hasSmell: false,

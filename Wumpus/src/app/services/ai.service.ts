@@ -19,7 +19,7 @@ export class AIService {
       const randomIndex = Math.floor(Math.random() * this.availableCells.length);
       const randomCell = this.availableCells[randomIndex];
   
-      return { row: randomCell.position.row, column: randomCell.position.col };
+      return { row: randomCell.position.row, column: randomCell.position.column };
     } else {
       clearInterval(this.aiInterval);
       return { row: -1, column: -1 }; 
