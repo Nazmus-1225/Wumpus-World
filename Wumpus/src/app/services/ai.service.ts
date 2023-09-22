@@ -16,14 +16,14 @@ export class AIService {
   randomCol: number = 0;
   player: Player = new Player();
   availableCells: Cell[]=[];
- // availableMoves: { row: number; col: number }[] = [];
+  availableMoves: { row: number; col: number }[] = [];
 
   makeAIMove(): { row: number, column: number } {
     if (this.availableCells.length > 0) {
       const randomIndex = Math.floor(Math.random() * this.availableCells.length);
       const randomCell = this.availableCells[randomIndex];
   
-      return { row: randomCell.position.row, column: randomCell.position.col };
+      return { row: randomCell.position.row, column: randomCell.position.column };
     } else {
       clearInterval(this.aiInterval);
       return { row: -1, column: -1 }; 
@@ -53,7 +53,7 @@ export class AIService {
 
   }
   calculateAdjacentCells(): { row: number; col: number }[] {
-    const { row, col } = this.player.position;
+    const { row, column: col } = this.player.position;
     const adjacentCells = [
       { row: row - 1, col },
       { row: row + 1, col },
@@ -71,6 +71,3 @@ export class AIService {
   }
 
 }
-
-
-

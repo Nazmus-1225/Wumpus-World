@@ -24,7 +24,7 @@ export class BoardComponent implements OnInit {
 
 
   ngOnInit(): void {
-    //  this.player = this.AI.player;
+    this.player = this.AI.player;
     this.initializeBoard();
     this.board = this.generateGame.getBoard();
     this.generateGame.placePitsWumpusTreasure();  //get a board
@@ -33,16 +33,15 @@ export class BoardComponent implements OnInit {
   }
 
 
-  playGame(){
+  playGame() {
     const gameInterval = setInterval(() => {
       if (!this.gameOver()) {
         const { row, column } = this.AI.makeAIMove();
-  
+
         // Randomly decide if AI should move or shoot arrow
         const shouldShootArrow = Math.random() < 0.2; // ekahne hocche logic thakbe kokhon shoot korbe
-  
+
         if (shouldShootArrow) {
-          // AI decided to shoot an arrow
           this.AI.shootArrow(row, column); // You may need to provide valid row and column here
         } else {
           // AI decided to make a move
@@ -54,41 +53,41 @@ export class BoardComponent implements OnInit {
       }
     }, 1000);
   }
-  
+
 
 
   initializeBoard(): void {
     this.generateGame.board = [];
     this.exploredBoard = [];
-  
+
     for (let row = 0; row < 10; row++) {
       const newRow: Cell[] = [];
       for (let col = 0; col < 10; col++) {
         const newCell: Cell = {
           type: CellType.Empty,
-          position: { row: row, col: col },
+          position: { row: row, column: col },
           isVisited: true,
           hasBreeze: false,
           hasSmell: false,
           hasLight: false,
-          flag_score: 0
-        });
+          flag_score: 0,
+        };
       }
       this.generateGame.board.push(newRow);
       this.exploredBoard.push(newRow);
     }
-  
+
     this.generateGame.board[0][0].isVisited = false;
     this.exploredBoard[0][0] = this.generateGame.board[0][0];
-  
+
     // Convert an array of { row: number; col: number; } objects into an array of Cell objects
     const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
       return this.generateGame.board[position.row][position.col];
     });
-  
+
     this.AI.availableCells = adjacentCells;
   }
-  
+
   getCellImage(cellType: CellType): string {
     switch (cellType) {
       case CellType.Wumpus:
@@ -125,23 +124,27 @@ export class BoardComponent implements OnInit {
 
   revealCell(rowIndex: number, colIndex: number): void {
     console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
-  
+
     if (!this.gameOver() && this.isMoveAvailable(rowIndex, colIndex)) {
       this.generateGame.board[rowIndex][colIndex].isVisited = false;
-      this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
-  
+      this.player.position = this.AI.player.position = { row: rowIndex, column: colIndex };
+
+      let availableMoves: { row: number; col: number }[] = this.AI.calculateAdjacentCells();
+
       // Convert an array of { row: number; col: number; } objects into an array of Cell objects
-      const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
-        return this.generateGame.board[position.row][position.col];
-      });
-  
-      this.AI.availableCells = adjacentCells;
-  
+      // const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
+      //   return this.generateGame.board[position.row][position.col];
+      // });
+
+      // this.AI.availableCells = adjacentCells;
+
+      this.AI,availableMoves= availableMoves;
+
       this.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
       this.updateScore(rowIndex, colIndex);
     }
   }
-  
+
   isMoveAvailable(rowIndex: number, colIndex: number): boolean {
     const adjacentCells = this.AI.calculateAdjacentCells();
     return adjacentCells.some(
@@ -150,20 +153,20 @@ export class BoardComponent implements OnInit {
   }
 
 
-shootArrow(row: number, col: number) {
-  this.AI.shootArrow(row, col);
-}
+  shootArrow(row: number, col: number) {
+    this.AI.shootArrow(row, col);
+  }
 
   updateScore(row: number, col: number) {
-    this.player.point=this.AI.player.point -= 1;
+    this.player.point = this.AI.player.point -= 1;
 
     if (this.generateGame.board[row][col].type == CellType.Treasure) {
-      this.player.point=this.AI.player.point += 1000;
+      this.player.point = this.AI.player.point += 1000;
       this.showMessage("Congratulations! You found the Treasure.")
     }
 
     else if (this.generateGame.board[row][col].type == CellType.Wumpus) {
-      this.player.point=this.AI.player.point -= 1000;
+      this.player.point = this.AI.player.point -= 1000;
       this.showMessage("Oops! Wumpus found you. Game over")
       //Game Over
     }
@@ -171,7 +174,7 @@ shootArrow(row: number, col: number) {
       || this.generateGame.board[row][col].type == CellType.BreezeAndPit
       || this.generateGame.board[row][col].type == CellType.SmellAndPit
       || this.generateGame.board[row][col].type == CellType.LightAndPit) {
-        this.player.point=this.AI.player.point -= 1000;
+      this.player.point = this.AI.player.point -= 1000;
       this.showMessage("Oops! You fell on a pit. Game over")
       // alert('You fell on a pit!');
       // this.player.position = { row: 0, col: 0 };
@@ -225,16 +228,16 @@ shootArrow(row: number, col: number) {
     }
   }
 
-  gameOver() : boolean{
-    if(this.AI.player.point<=0){    
+  gameOver(): boolean {
+    if (this.AI.player.point <= 0) {
       this.showMessage('Sorry. No moves left. Game Over.');
       return true;
     }
-     
-    else{
+
+    else {
       return false;
     }
-     
+
   }
 
 }
