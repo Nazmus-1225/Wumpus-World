@@ -15,7 +15,7 @@ export class EvaluateService {
     private AI: AIService) { }
     player: Player = new Player();
 
-  isGameOver: boolean = false;
+ isGameOver: boolean = false;
 
 
   updateRisk(row: number, col: number) {
@@ -39,6 +39,23 @@ export class EvaluateService {
         cell.pit_probability = 1;
         cell.risk_score = 1;
         break;
+      case CellType.Light:
+        cell.risk_score = -0.1;
+        break;
+      case CellType.Smell:
+      case CellType.Breeze:
+    //  case CellType.BreezeAndSmell:
+    //  case CellType.Smell_Breeze_And_Light:
+        cell.risk_score = 0.1;
+        break;
+     // case CellType.Empty:
+    //  case CellType.DeadWumpus:
+    //  case CellType.SmellAndLight:
+    //  case CellType.BreezeAndLight:
+    //    cell.risk_score = 0.0;
+     //   break;
+      
+
 
     }
 
@@ -50,27 +67,28 @@ export class EvaluateService {
     for (const offset of adjacentCells) {
     //  console.log(offset.position.column+" "+offset.position.row)
     //ekhane dondogol chhilo joddur bujchi...
-    // const adjacentRow = row + offset.position.row;
-    // const adjacentCol = col + offset.position.column;
-      const adjacentRow = offset.position.row;
-      const adjacentCol = offset.position.column;
+   // const adjacentRow = row + offset.position.row;
+   // const adjacentCol = col + offset.position.column;
+     const adjacentRow = offset.position.row;
+    const adjacentCol = offset.position.column;
      // console.log(adjacentRow+" b "+adjacentCol)
       if (
         adjacentRow >= 0 && adjacentRow < this.generateGame.board.length &&
         adjacentCol >= 0 && adjacentCol < this.generateGame.board[0].length
       ) {
-        const adjacentCell = this.generateGame.board[adjacentRow][adjacentCol];
+        const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol];
         console.log(adjacentCell.position.row+" bla "+adjacentCell.position.column);
-        this.updateAdjacentRisk(adjacentCell);
+        this.updateAdjacentRisk(adjacentCell,cell.type);
       }
     }
   }
 
-  updateAdjacentRisk(adjacentCell: Cell) {
+  updateAdjacentRisk(adjacentCell: Cell,currentCellType:CellType) {
   //  console.log("hi");
     if (adjacentCell.isHidden) { // reveal board korle !adjacentCell.isHidden eita condition dis
-      switch (adjacentCell.type) {
+      switch (currentCellType) {
         case CellType.Breeze:
+
           adjacentCell.pit_probability += 0.2;
           console.log("br pai");
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
@@ -111,6 +129,12 @@ export class EvaluateService {
           adjacentCell.wumpus_probability += 0.2;
           adjacentCell.treasure_probability -= 0.2;
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
+        case CellType.Empty:
+          adjacentCell.pit_probability =0.0;
+          adjacentCell.wumpus_probability =0.0;
+          adjacentCell.treasure_probability =0.0;
+          adjacentCell.risk_score = 0.0;
           break;
       }
     }
@@ -184,21 +208,31 @@ export class EvaluateService {
   }
 
   showMessage(message: string): void {
+    this.isGameOver = true;
+
     const dialogRef = this.dialog.open(MessageModalComponent, {
       width: '300px',
       data: { message }
-    });
-
+    })
     dialogRef.afterClosed().subscribe(() => {
       window.location.reload();
     });
-    // dialogRef.disableClose = true;
+    dialogRef.disableClose = true;
   }
-
+  revealBoard() {
+    // Iterate through your board and set the isHidden property of each cell to false
+    for (let row of this.generateGame.board) {
+      for (let cell of row) {
+        cell.isHidden = false;
+      }
+    }
+  }
   gameOver() {
-    if (this.AI.player.point <= 0) {
+    if (this.AI.player.point <= 80) {
+      console.log("mara kha"+this.AI.player.point);
       this.showMessage('Sorry. No moves left. Game Over.');
       this.isGameOver = true;
+      this.revealBoard();
     }
   }
 }

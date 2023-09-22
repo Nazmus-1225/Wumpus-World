@@ -6,7 +6,6 @@ import { GenerateGameService } from 'src/app/services/generate-game.service';
 import { AIService } from 'src/app/services/ai.service';
 import { EvaluateService } from 'src/app/services/evaluate.service';
 
-
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
@@ -35,13 +34,14 @@ export class BoardComponent implements OnInit {
   playGame() {
     const gameInterval = setInterval(() => {
       if (!this.evaluate.isGameOver) {
+        this.evaluate.gameOver();
         const { row, column } = this.AI.makeAIMove();
         this.revealCell(row, column);
       } else {
-        clearInterval(gameInterval); 
-        window.location.reload();
+        clearInterval(gameInterval);
+        this.evaluate.isGameOver = true;
       }
-    }, 3000); //move after every 3 seconds
+    }, 1000); // Move after every 3 seconds
   }
 
 
@@ -62,27 +62,20 @@ export class BoardComponent implements OnInit {
             row: row,
             column: col
           },
-          wumpus_probability: 0,
-          pit_probability: 0,
-          treasure_probability: 0
+          wumpus_probability: 0.0,
+          pit_probability: 0.0,
+          treasure_probability: 0.0
         });
       }
       this.generateGame.board.push(newRow);
       this.AI.exploredBoard.push(newRow);
     }
-    this.generateGame.board[0][0].isHidden = false;
+    this.generateGame.board[0][9].isHidden = false;
     this.AI.exploredBoard[0][0] = this.generateGame.board[0][0];
 
     this.AI.availableCells = this.calculateAdjacentCells();
   }
-  revealBoard() {
-    // Iterate through your board and set the isHidden property of each cell to false
-    for (let row of this.board) {
-      for (let cell of row) {
-        cell.isHidden = false;
-      }
-    }
-  }
+
   getCellImage(cellType: CellType): string {
     switch (cellType) {
       case CellType.Wumpus:
@@ -130,7 +123,7 @@ export class BoardComponent implements OnInit {
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
 
       this.evaluate.updateScore(rowIndex, colIndex);
-      this.evaluate.updateRisk(rowIndex,colIndex); // is it updating? No.
+      this.evaluate.updateRisk(rowIndex,colIndex); 
       
       this.board[rowIndex][colIndex]=this.AI.exploredBoard[rowIndex][colIndex];
       this.generateGame.board[rowIndex][colIndex].risk_score =this.AI.exploredBoard[rowIndex][colIndex].risk_score;
@@ -215,5 +208,7 @@ export class BoardComponent implements OnInit {
       col < this.generateGame.board[0].length
     );
   }
+  
+
 
 }

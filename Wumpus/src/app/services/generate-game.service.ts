@@ -28,7 +28,7 @@ export class GenerateGameService {
         colIndex = Math.floor(Math.random() * this.board[0].length);
       } while (
         this.board[rowIndex][colIndex].type !== CellType.Empty ||
-        (rowIndex === 0 && colIndex === 0)
+        (rowIndex === 0 && colIndex === 9)
       );
 
       this.board[rowIndex][colIndex].type = elementType;

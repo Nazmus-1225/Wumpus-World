@@ -17,6 +17,6 @@ export class MessageModalComponent {
 
   closeModal(): void {
     this.dialogRef.close();
-    window.location.reload();
+   // window.location.reload();
   }
 }
