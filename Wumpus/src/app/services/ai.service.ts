@@ -8,7 +8,7 @@ import { Cell, CellType } from '../models/cell';
 })
 export class AIService {
   aiInterval: number = 1000;
-
+  
   constructor(
     private generateGame: GenerateGameService
   ) { }
@@ -16,6 +16,7 @@ export class AIService {
   randomCol: number = 0;
   player: Player = new Player();
   availableCells: Cell[] = [];
+  arrowShot = false;
   // availableMoves: { row: number; col: number }[] = [];
   exploredBoard: Cell[][] = [];
 
@@ -23,8 +24,10 @@ export class AIService {
     if (this.availableCells.length > 0) {
 
       for (const cell of this.availableCells) {
-        if (cell.wumpus_probability > 0.8) {
+   //     console.log(cell.position.row+"    "+cell.position.column+"   ")
+   if (cell.wumpus_probability > 0.8 && !this.arrowShot) {
           this.shootArrow(cell.position.row, cell.position.column);
+         this.arrowShot = true;
           return { row:-1, column: -1 };
         }
       }
@@ -37,7 +40,8 @@ export class AIService {
           lowestRiskCell = cell;
         }
       }
-  
+      
+  console.log("row: "+lowestRiskCell.position.row+" column: "+ lowestRiskCell.position.column);
       return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
     } else {
       clearInterval(this.aiInterval);

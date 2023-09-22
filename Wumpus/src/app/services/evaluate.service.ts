@@ -4,7 +4,7 @@ import { GenerateGameService } from './generate-game.service';
 import { AIService } from './ai.service';
 import { Cell, CellType } from '../models/cell';
 import { MessageModalComponent } from '../components/message-modal/message-modal.component';
-
+import { Player } from 'src/app/models/player.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -13,14 +13,14 @@ export class EvaluateService {
   constructor(private dialog: MatDialog,
     private generateGame: GenerateGameService,
     private AI: AIService) { }
-
+    player: Player = new Player();
 
   isGameOver: boolean = false;
 
 
   updateRisk(row: number, col: number) {
     const cell = this.generateGame.board[row][col];
-
+   // console.log(row+" bla "+col);
     switch (cell.type) {
       case CellType.Treasure:
         cell.treasure_probability = 1;
@@ -45,37 +45,46 @@ export class EvaluateService {
     this.generateGame.board[row][col] = cell
     this.AI.exploredBoard[row][col] =  this.generateGame.board[row][col];
 
-    const adjacentCells = this.calculateAdjacentCells(row, col);
-
+    const adjacentCells = this.calculateAdjacentCells(row,col);
+    
     for (const offset of adjacentCells) {
-      const adjacentRow = row + offset.position.row;
-      const adjacentCol = col + offset.position.column;
-
+    //  console.log(offset.position.column+" "+offset.position.row)
+    //ekhane dondogol chhilo joddur bujchi...
+    // const adjacentRow = row + offset.position.row;
+    // const adjacentCol = col + offset.position.column;
+      const adjacentRow = offset.position.row;
+      const adjacentCol = offset.position.column;
+     // console.log(adjacentRow+" b "+adjacentCol)
       if (
         adjacentRow >= 0 && adjacentRow < this.generateGame.board.length &&
         adjacentCol >= 0 && adjacentCol < this.generateGame.board[0].length
       ) {
         const adjacentCell = this.generateGame.board[adjacentRow][adjacentCol];
+        console.log(adjacentCell.position.row+" bla "+adjacentCell.position.column);
         this.updateAdjacentRisk(adjacentCell);
       }
     }
   }
 
   updateAdjacentRisk(adjacentCell: Cell) {
-    if (adjacentCell.isHidden) {
+  //  console.log("hi");
+    if (adjacentCell.isHidden) { // reveal board korle !adjacentCell.isHidden eita condition dis
       switch (adjacentCell.type) {
         case CellType.Breeze:
           adjacentCell.pit_probability += 0.2;
+          console.log("br pai");
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
           break;
 
         case CellType.Smell:
           adjacentCell.wumpus_probability += 0.3;
+          console.log("sm pai");
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
           break;
 
         case CellType.Light:
           adjacentCell.treasure_probability -= 0.3;
+          console.log("lg pai");
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
           break;
 
@@ -112,7 +121,8 @@ export class EvaluateService {
   }
 
 
-  calculateAdjacentCells(row: number, col: number): Cell[] {
+  calculateAdjacentCells(row:number,col:number): Cell[] {
+  //  const { row, col } = this.player.position;
     const adjacentCellPositions = [
       { row: row - 1, col },
       { row: row + 1, col },

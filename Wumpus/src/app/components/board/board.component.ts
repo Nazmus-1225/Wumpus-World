@@ -75,7 +75,14 @@ export class BoardComponent implements OnInit {
 
     this.AI.availableCells = this.calculateAdjacentCells();
   }
-
+  revealBoard() {
+    // Iterate through your board and set the isHidden property of each cell to false
+    for (let row of this.board) {
+      for (let cell of row) {
+        cell.isHidden = false;
+      }
+    }
+  }
   getCellImage(cellType: CellType): string {
     switch (cellType) {
       case CellType.Wumpus:
