@@ -111,6 +111,7 @@ export class BoardComponent implements OnInit {
     }
   }
 
+
   revealCell(rowIndex: number, colIndex: number): void {
     console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
 
