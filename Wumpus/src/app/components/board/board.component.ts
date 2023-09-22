@@ -56,36 +56,33 @@ export class BoardComponent implements OnInit {
   }
   
 
-
   initializeBoard(): void {
     this.generateGame.board = [];
     this.exploredBoard = [];
-  
+
     for (let row = 0; row < 10; row++) {
       const newRow: Cell[] = [];
-      for (let col = 0; col < 10; col++) {
-        const newCell: Cell = {
-          type: CellType.Empty,
-          position: { row: row, col: col },
-          isVisited: true,
-          hasBreeze: false,
-          hasSmell: false,
-          hasLight: false,
-          flag_score: 0
-        });
+      for (let col = 0; col < 10; col++) {const newCell: Cell = {
+        type: CellType.Empty,
+        position: { row: row, col: col },
+        isVisited: true,
+        hasBreeze: false,
+        hasSmell: false,
+        hasLight: false,
+        flag_score: 0};
+        newRow.push(newCell);
       }
       this.generateGame.board.push(newRow);
       this.exploredBoard.push(newRow);
     }
-  
+
     this.generateGame.board[0][0].isVisited = false;
     this.exploredBoard[0][0] = this.generateGame.board[0][0];
-  
-    // Convert an array of { row: number; col: number; } objects into an array of Cell objects
-    const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
+     // Convert an array of { row: number; col: number; } objects into an array of Cell objects
+     const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
       return this.generateGame.board[position.row][position.col];
     });
-  
+
     this.AI.availableCells = adjacentCells;
   }
   
@@ -123,20 +120,21 @@ export class BoardComponent implements OnInit {
     }
   }
 
+
   revealCell(rowIndex: number, colIndex: number): void {
     console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
-  
+
     if (!this.gameOver() && this.isMoveAvailable(rowIndex, colIndex)) {
       this.generateGame.board[rowIndex][colIndex].isVisited = false;
       this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
-  
+
       // Convert an array of { row: number; col: number; } objects into an array of Cell objects
       const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
         return this.generateGame.board[position.row][position.col];
       });
-  
+
       this.AI.availableCells = adjacentCells;
-  
+
       this.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
       this.updateScore(rowIndex, colIndex);
     }
