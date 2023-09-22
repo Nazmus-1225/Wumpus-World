@@ -42,7 +42,8 @@ export class EvaluateService {
 
     }
 
-    this.AI.exploredBoard[row][col] = this.generateGame.board[row][col] = cell;
+    this.generateGame.board[row][col] = cell
+    this.AI.exploredBoard[row][col] =  this.generateGame.board[row][col];
 
     const adjacentCells = this.calculateAdjacentCells(row, col);
 
@@ -61,50 +62,50 @@ export class EvaluateService {
   }
 
   updateAdjacentRisk(adjacentCell: Cell) {
+    if (adjacentCell.isHidden) {
+      switch (adjacentCell.type) {
+        case CellType.Breeze:
+          adjacentCell.pit_probability += 0.2;
+          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
 
-    switch (adjacentCell.type) {
-      case CellType.Breeze:
-        adjacentCell.pit_probability += 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-        break;
+        case CellType.Smell:
+          adjacentCell.wumpus_probability += 0.3;
+          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
 
-      case CellType.Smell:
-        adjacentCell.wumpus_probability += 0.3;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-        break;
+        case CellType.Light:
+          adjacentCell.treasure_probability -= 0.3;
+          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
 
-      case CellType.Light:
-        adjacentCell.treasure_probability -= 0.3;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-        break;
+        case CellType.BreezeAndSmell:
+          adjacentCell.pit_probability += 0.2;
+          adjacentCell.wumpus_probability += 0.2;
+          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
 
-      case CellType.BreezeAndSmell:
-        adjacentCell.pit_probability += 0.2;
-        adjacentCell.wumpus_probability += 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-        break;
+        case CellType.BreezeAndLight:
+          adjacentCell.pit_probability += 0.2;
+          adjacentCell.treasure_probability -= 0.2;
+          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
 
-      case CellType.BreezeAndLight:
-        adjacentCell.pit_probability += 0.2;
-        adjacentCell.treasure_probability -= 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-        break;
+        case CellType.SmellAndLight:
+          adjacentCell.wumpus_probability += 0.2;
+          adjacentCell.treasure_probability -= 0.2;
+          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
 
-      case CellType.SmellAndLight:
-        adjacentCell.wumpus_probability += 0.2;
-        adjacentCell.treasure_probability -= 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-        break;
-
-      case CellType.Smell_Breeze_And_Light:
-        adjacentCell.pit_probability += 0.2;
-        adjacentCell.wumpus_probability += 0.2;
-        adjacentCell.treasure_probability -= 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-        break;
+        case CellType.Smell_Breeze_And_Light:
+          adjacentCell.pit_probability += 0.2;
+          adjacentCell.wumpus_probability += 0.2;
+          adjacentCell.treasure_probability -= 0.2;
+          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+          break;
+      }
     }
 
-    // Update the adjacent cell in the explored board
     const adjacentRow = adjacentCell.position.row;
     const adjacentCol = adjacentCell.position.column;
     this.AI.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;

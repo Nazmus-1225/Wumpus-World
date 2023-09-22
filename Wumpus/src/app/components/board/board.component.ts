@@ -73,7 +73,7 @@ export class BoardComponent implements OnInit {
     this.generateGame.board[0][0].isHidden = false;
     this.AI.exploredBoard[0][0] = this.generateGame.board[0][0];
 
-    this.AI.availableCells = this.AI.calculateAdjacentCells();
+    this.AI.availableCells = this.calculateAdjacentCells();
   }
 
   getCellImage(cellType: CellType): string {
@@ -112,25 +112,28 @@ export class BoardComponent implements OnInit {
 
 
   revealCell(rowIndex: number, colIndex: number): void {
-    console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
+    // console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
 
     if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
       this.generateGame.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
       this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
 
-      this.AI.availableCells = this.AI.calculateAdjacentCells();
-      
-      this.evaluate.updateScore(rowIndex, colIndex);
-      this.evaluate.updateRisk(rowIndex,colIndex);
+      this.AI.availableCells = this.calculateAdjacentCells();
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
 
+      this.evaluate.updateScore(rowIndex, colIndex);
+      this.evaluate.updateRisk(rowIndex,colIndex); // is it updating? No.
+      
+      this.board[rowIndex][colIndex]=this.AI.exploredBoard[rowIndex][colIndex];
+      this.generateGame.board[rowIndex][colIndex].risk_score =this.AI.exploredBoard[rowIndex][colIndex].risk_score;
+      this.board=this.AI.exploredBoard;
       this.player=this.AI.player;
     }
   }
 
   isMoveAvailable(rowIndex: number, colIndex: number): boolean {
-    const adjacentCells = this.AI.calculateAdjacentCells();
+    const adjacentCells = this.calculateAdjacentCells();
     return adjacentCells.some(
       (move) => move.position.row === rowIndex && move.position.column === colIndex
     );
@@ -175,6 +178,35 @@ export class BoardComponent implements OnInit {
       default:
         return "Unknown";
     }
+  }
+
+  calculateAdjacentCells(): Cell[] {
+    const { row, col } = this.player.position;
+    const adjacentCellPositions = [
+      { row: row - 1, col },
+      { row: row + 1, col },
+      { row, col: col - 1 },
+      { row, col: col + 1 },
+    ];
+
+    const validAdjacentCellPositions = adjacentCellPositions.filter((position) =>
+      this.isValidCellPosition(position.row, position.col)
+    );
+
+    const adjacentCells = validAdjacentCellPositions.map((position) =>
+      this.generateGame.board[position.row][position.col]
+    );
+
+    return adjacentCells;
+  }
+
+  isValidCellPosition(row: number, col: number): boolean {
+    return (
+      row >= 0 &&
+      row < this.generateGame.board.length &&
+      col >= 0 &&
+      col < this.generateGame.board[0].length
+    );
   }
 
 }

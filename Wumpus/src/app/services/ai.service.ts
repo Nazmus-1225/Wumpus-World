@@ -21,10 +21,18 @@ export class AIService {
 
   makeAIMove(): { row: number, column: number } {
     if (this.availableCells.length > 0) {
+
+      for (const cell of this.availableCells) {
+        if (cell.wumpus_probability > 0.8) {
+          this.shootArrow(cell.position.row, cell.position.column);
+          return { row:-1, column: -1 };
+        }
+      }
       let lowestRiskCell = this.availableCells[0];
       console.log("Risk score: ");
       for (const cell of this.availableCells) {
         console.log(cell.risk_score);
+        
         if (cell.risk_score < lowestRiskCell.risk_score) {
           lowestRiskCell = cell;
         }
@@ -60,35 +68,7 @@ export class AIService {
 
   }
 
-  calculateAdjacentCells(): Cell[] {
-    const { row, col } = this.player.position;
-    const adjacentCellPositions = [
-      { row: row - 1, col },
-      { row: row + 1, col },
-      { row, col: col - 1 },
-      { row, col: col + 1 },
-    ];
-
-    const validAdjacentCellPositions = adjacentCellPositions.filter((position) =>
-      this.isValidCellPosition(position.row, position.col)
-    );
-
-    const adjacentCells = validAdjacentCellPositions.map((position) =>
-      this.generateGame.board[position.row][position.col]
-    );
-
-    return adjacentCells;
-  }
-
-  isValidCellPosition(row: number, col: number): boolean {
-    return (
-      row >= 0 &&
-      row < this.generateGame.board.length &&
-      col >= 0 &&
-      col < this.generateGame.board[0].length
-    );
-  }
-
+ 
 
 }
 
