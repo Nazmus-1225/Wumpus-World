@@ -18,10 +18,15 @@ export enum CellType {
 export interface Cell {
     type: CellType;
     position: { row: number; column: number };
-    isVisited: boolean;
+    isHidden: boolean;
     hasBreeze: boolean;
     hasSmell: boolean;
     hasLight: boolean;
-    flag_score: number;
+    wumpus_probability: number;
+    pit_probability: number;
+    treasure_probability: number; //keeping it negative
+    
+    risk_score: number;
+
   }
 

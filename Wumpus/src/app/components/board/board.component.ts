@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Cell, CellType } from 'src/app/models/cell';
 import { Player } from 'src/app/models/player.model';
-import { MessageModalComponent } from '../message-modal/message-modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { GenerateGameService } from 'src/app/services/generate-game.service';
 import { AIService } from 'src/app/services/ai.service';
+import { EvaluateService } from 'src/app/services/evaluate.service';
 
 
 @Component({
@@ -16,76 +16,65 @@ export class BoardComponent implements OnInit {
 
   constructor(private dialog: MatDialog,
     private generateGame: GenerateGameService,
-    private AI: AIService) { }
+    private AI: AIService,
+    private evaluate: EvaluateService) { }
 
   board: Cell[][] = [];
-  exploredBoard: Cell[][] = [];
+
   player: Player = new Player();
 
 
   ngOnInit(): void {
-    this.player = this.AI.player;
+    //  this.player = this.AI.player;
     this.initializeBoard();
     this.board = this.generateGame.getBoard();
-    this.generateGame.placePitsWumpusTreasure();  //get a board
+    this.generateGame.placePitsWumpusTreasure();  //get the board
     this.playGame(); // not implemented yet
 
   }
 
-
   playGame() {
     const gameInterval = setInterval(() => {
-      if (!this.gameOver()) {
+      if (!this.evaluate.isGameOver) {
         const { row, column } = this.AI.makeAIMove();
-
-        // Randomly decide if AI should move or shoot arrow
-        const shouldShootArrow = Math.random() < 0.2; // ekahne hocche logic thakbe kokhon shoot korbe
-
-        if (shouldShootArrow) {
-          this.AI.shootArrow(row, column); // You may need to provide valid row and column here
-        } else {
-          // AI decided to make a move
-          this.revealCell(row, column);
-        }
+        this.revealCell(row, column);
       } else {
-        clearInterval(gameInterval);
+        // clearInterval(gameInterval); 
         window.location.reload();
       }
     }, 1000);
   }
 
 
-
   initializeBoard(): void {
     this.generateGame.board = [];
-    this.exploredBoard = [];
-
+    this.AI.exploredBoard = [];
     for (let row = 0; row < 10; row++) {
       const newRow: Cell[] = [];
       for (let col = 0; col < 10; col++) {
-        const newCell: Cell = {
+        newRow.push({
           type: CellType.Empty,
-          position: { row: row, column: col },
-          isVisited: true,
+          isHidden: true,
           hasBreeze: false,
           hasSmell: false,
           hasLight: false,
-          flag_score: 0,
-        };
+          risk_score: 0,
+          position: {
+            row: row,
+            column: col
+          },
+          wumpus_probability: 0,
+          pit_probability: 0,
+          treasure_probability: 0
+        });
       }
       this.generateGame.board.push(newRow);
-      this.exploredBoard.push(newRow);
+      this.AI.exploredBoard.push(newRow);
     }
+    this.generateGame.board[0][0].isHidden = false;
+    this.AI.exploredBoard[0][0] = this.generateGame.board[0][0];
 
-    this.generateGame.board[0][0].isVisited = false;
-    this.exploredBoard[0][0] = this.generateGame.board[0][0];
-
-    // Convert an array of { row: number; col: number; } objects into an array of Cell objects
-    const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
-      return this.generateGame.board[position.row][position.col];
-    });
-
-    this.AI.availableCells = adjacentCells;
+    this.AI.availableCells = this.AI.calculateAdjacentCells();
   }
 
   getCellImage(cellType: CellType): string {
@@ -125,30 +114,24 @@ export class BoardComponent implements OnInit {
   revealCell(rowIndex: number, colIndex: number): void {
     console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
 
-    if (!this.gameOver() && this.isMoveAvailable(rowIndex, colIndex)) {
-      this.generateGame.board[rowIndex][colIndex].isVisited = false;
-      this.player.position = this.AI.player.position = { row: rowIndex, column: colIndex };
+    if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
+      this.generateGame.board[rowIndex][colIndex].isHidden = false;
+      this.generateGame.board[rowIndex][colIndex].risk_score +=0.1; //visited gets less priority
+      this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
 
-      let availableMoves: { row: number; col: number }[] = this.AI.calculateAdjacentCells();
+      this.AI.availableCells = this.AI.calculateAdjacentCells();
+      this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
 
-      // Convert an array of { row: number; col: number; } objects into an array of Cell objects
-      // const adjacentCells: Cell[] = this.AI.calculateAdjacentCells().map((position) => {
-      //   return this.generateGame.board[position.row][position.col];
-      // });
-
-      // this.AI.availableCells = adjacentCells;
-
-      this.AI,availableMoves= availableMoves;
-
-      this.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
-      this.updateScore(rowIndex, colIndex);
+      this.evaluate.updateScore(rowIndex, colIndex);
+      this.evaluate.updateRisk(rowIndex,colIndex);
+      this.player=this.AI.player;
     }
   }
 
   isMoveAvailable(rowIndex: number, colIndex: number): boolean {
     const adjacentCells = this.AI.calculateAdjacentCells();
     return adjacentCells.some(
-      (move) => move.row === rowIndex && move.col === colIndex
+      (move) => move.position.row === rowIndex && move.position.column === colIndex
     );
   }
 
@@ -157,41 +140,6 @@ export class BoardComponent implements OnInit {
     this.AI.shootArrow(row, col);
   }
 
-  updateScore(row: number, col: number) {
-    this.player.point = this.AI.player.point -= 1;
-
-    if (this.generateGame.board[row][col].type == CellType.Treasure) {
-      this.player.point = this.AI.player.point += 1000;
-      this.showMessage("Congratulations! You found the Treasure.")
-    }
-
-    else if (this.generateGame.board[row][col].type == CellType.Wumpus) {
-      this.player.point = this.AI.player.point -= 1000;
-      this.showMessage("Oops! Wumpus found you. Game over")
-      //Game Over
-    }
-    else if (this.generateGame.board[row][col].type == CellType.Pit
-      || this.generateGame.board[row][col].type == CellType.BreezeAndPit
-      || this.generateGame.board[row][col].type == CellType.SmellAndPit
-      || this.generateGame.board[row][col].type == CellType.LightAndPit) {
-      this.player.point = this.AI.player.point -= 1000;
-      this.showMessage("Oops! You fell on a pit. Game over")
-      // alert('You fell on a pit!');
-      // this.player.position = { row: 0, col: 0 };
-    }
-
-  }
-
-  showMessage(message: string): void {
-    const dialogRef = this.dialog.open(MessageModalComponent, {
-      width: '300px',
-      data: { message }
-    });
-
-    dialogRef.afterClosed().subscribe(() => {
-      window.location.reload();
-    });
-  }
 
   getCellTypeString(cellType: CellType): string {
     switch (cellType) {
@@ -228,16 +176,6 @@ export class BoardComponent implements OnInit {
     }
   }
 
-  gameOver(): boolean {
-    if (this.AI.player.point <= 0) {
-      this.showMessage('Sorry. No moves left. Game Over.');
-      return true;
-    }
-
-    else {
-      return false;
-    }
-
-  }
+  
 
 }

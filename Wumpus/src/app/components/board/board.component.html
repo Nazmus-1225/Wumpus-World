@@ -9,12 +9,12 @@
       (click)="revealCell(rowIndex, colIndex)">
 
         <div class="image-container">
-          <div class="cell overlay-image" *ngIf="!cell.isVisited && cell.hasLight"></div>
-          <img *ngIf="!cell.isVisited || (rowIndex === player.position.row && colIndex === player.position.column)"
+          <div class="cell overlay-image" *ngIf="!cell.isHidden && cell.hasLight"></div>
+          <img *ngIf="!cell.isHidden || (rowIndex === player.position.row && colIndex === player.position.col)"
             [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
-          <img *ngIf="cell.isVisited" src="assets/brick.png" alt="Brick" class="cell-image" />
+          <img *ngIf="cell.isHidden" src="assets/brick.png" alt="Brick" class="cell-image" />
 
-          <img *ngIf="rowIndex === player.position.row && colIndex === player.position.column" src="assets/player.png"
+          <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/player.png"
             alt="Player" class="player-image overlay-image" />
         </div>
       </div>
@@ -23,9 +23,9 @@
 
   <div class="shoot-buttons-container">
     <p>Shoot Arrow</p>
-    <button class="shoot-button" (click)="shootArrow(player.position.row - 1, player.position.column)">Left</button>
-    <button class="shoot-button" (click)="shootArrow(player.position.row + 1, player.position.column)">Right</button>
-    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.column + 1)">Down</button>
-    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.column - 1)">Up</button>
+    <button class="shoot-button" (click)="shootArrow(player.position.row - 1, player.position.col)">Left</button>
+    <button class="shoot-button" (click)="shootArrow(player.position.row + 1, player.position.col)">Right</button>
+    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.col + 1)">Down</button>
+    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.col - 1)">Up</button>
   </div>
 </div>
