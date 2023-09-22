@@ -20,7 +20,6 @@ export class BoardComponent implements OnInit {
     private evaluate: EvaluateService) { }
 
   board: Cell[][] = [];
-
   player: Player = new Player();
 
 
@@ -39,10 +38,10 @@ export class BoardComponent implements OnInit {
         const { row, column } = this.AI.makeAIMove();
         this.revealCell(row, column);
       } else {
-        // clearInterval(gameInterval); 
+        clearInterval(gameInterval); 
         window.location.reload();
       }
-    }, 1000);
+    }, 3000); //move after every 3 seconds
   }
 
 
@@ -117,14 +116,15 @@ export class BoardComponent implements OnInit {
 
     if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
-      this.generateGame.board[rowIndex][colIndex].risk_score +=0.1; //visited gets less priority
+      this.generateGame.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
       this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
 
       this.AI.availableCells = this.AI.calculateAdjacentCells();
-      this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
-
+      
       this.evaluate.updateScore(rowIndex, colIndex);
       this.evaluate.updateRisk(rowIndex,colIndex);
+      this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
+
       this.player=this.AI.player;
     }
   }
@@ -176,7 +176,5 @@ export class BoardComponent implements OnInit {
         return "Unknown";
     }
   }
-
-  
 
 }

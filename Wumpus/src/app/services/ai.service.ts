@@ -22,7 +22,9 @@ export class AIService {
   makeAIMove(): { row: number, column: number } {
     if (this.availableCells.length > 0) {
       let lowestRiskCell = this.availableCells[0];
+      console.log("Risk score: ");
       for (const cell of this.availableCells) {
+        console.log(cell.risk_score);
         if (cell.risk_score < lowestRiskCell.risk_score) {
           lowestRiskCell = cell;
         }
