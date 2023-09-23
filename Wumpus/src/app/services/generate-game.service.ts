@@ -33,6 +33,8 @@ export class GenerateGameService {
     console.log("Gold count " + treasure_count);
     this.treasure_count = treasure_count;
   }
+
+  
   placePitsWumpusTreasure(): void {
     this.placeRandomElements(CellType.Pit, this.pit_count); // Place 5 pits
     this.placeRandomElements(CellType.Wumpus, this.wumpus_count); // Place 1 Wumpus

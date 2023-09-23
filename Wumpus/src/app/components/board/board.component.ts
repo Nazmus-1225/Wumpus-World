@@ -26,10 +26,13 @@ export class BoardComponent implements OnInit {
 // Add these properties to your component class
 isHumanMode: boolean = false;
 private gameInterval: any;
+isGamePaused: boolean=false;
+isPauseButtonVisible : boolean=false;
 
 // Function to start as Human
 startAsHuman() {
   this.isHumanMode = true;
+  this.isPauseButtonVisible= false;
   console.log("h")
   // Add any other logic you need when starting as a Human
 }
@@ -37,6 +40,7 @@ startAsHuman() {
 // Function to start as AI
 startAsAI() {
   this.isHumanMode = false;
+  this.isPauseButtonVisible= true;
   this.playGame();
   console.log("a")
   // Add any other logic you need when starting as an AI
@@ -56,20 +60,21 @@ startAsAI() {
 revealBoard(){
   this.evaluate.revealBoard();
 }
+
+
   playGame() {
-    this.gameInterval = setInterval(() => {
-      if (!this.evaluate.isGameOver) {
     this.gameInterval = setInterval(() => {
       if (!this.evaluate.isGameOver && !this.isGamePaused) {
         this.evaluate.gameOver();
         const { row, column } = this.AI.makeAIMove();
         this.revealCell(row, column);
       } else {
-        clearInterval(this.this.gameInterval);
+        clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
     }, 1000); // Move after every 3 seconds
   }
+
   ngOnDestroy(): void {
     clearInterval(this.gameInterval); // Stop the game interval
   }

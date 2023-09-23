@@ -20,24 +20,22 @@
     </div>
   </div>
   <div class="start-buttons-container">
-    <!-- Start button options -->
-    <div class="start-buttons-container">
-      <!-- Start button options -->
-      <button class="start-button" (click)="startAsHuman()" >Start as Human</button>
-      <button class="start-button" (click)="startAsAI()" >Start as AI</button>
-    </div>
-    <button class="shoot-button" (click)="revealBoard()">re</button>
+
+    <button class="start-button" (click)="startAsHuman()">Start as Human</button>
+    <button class="start-button" (click)="startAsAI()">Start as AI</button>
+    <button class="shoot-button" (click)="revealBoard()">reveal board</button>  <!-- last e delete korte hobe -->
   </div>
+
+
   <div class="shoot-buttons-container" *ngIf="isHumanMode">
     <p>Shoot Arrow</p>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row - 1, player.position.col)">Left</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row + 1, player.position.col)">Right</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col + 1)">Down</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col - 1)">Up</button>
-
   </div>
 
-  <div class="game-controls">
+  <div class="game-controls" *ngIf="isPauseButtonVisible">
     <button (click)="togglePause()" [disabled]="isGamePaused">Pause</button>
     <button (click)="togglePause()" [disabled]="!isGamePaused">Resume</button>
   </div>
