@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { EvaluateService } from 'src/app/services/evaluate.service';
 import { GenerateGameService } from 'src/app/services/generate-game.service';
 
 @Component({
@@ -10,7 +11,7 @@ import { GenerateGameService } from 'src/app/services/generate-game.service';
 export class SettingsComponent implements OnInit {
   public fileInput: any;
 
-  constructor(public router: Router,private generateGame: GenerateGameService,) { }
+  constructor(public router: Router,private generateGame: GenerateGameService,private evaluate:EvaluateService) { }
   fileContent: string = "";
   sliderGrid= "10x10";
   sliderPit = 2;
@@ -57,6 +58,9 @@ export class SettingsComponent implements OnInit {
   };
 
   startGame(){
+    this.evaluate.isGameOver=false;
+    this.evaluate.player.point=100;
+    this.generateGame.treasure_left=this.sliderGold;
     if(!this.customInput){
       console.log("Custom " + this.customInput);
        this.generateGame.setgoldCount(this.sliderGold);

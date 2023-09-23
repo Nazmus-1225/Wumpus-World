@@ -20,7 +20,7 @@
       </div>
     </div>
   </div>
-  <div class="start-buttons-container">
+  <div class="start-buttons-container" *ngIf="!buttonsPressed">
 
     <button class="start-button" (click)="startAsHuman()">Start as Human</button>
     <button class="start-button" (click)="startAsAI()">Start as AI</button>
