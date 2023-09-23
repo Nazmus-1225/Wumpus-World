@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Cell } from '../models/cell';
+import { Cell, CellType } from '../models/cell';
+import { HelperService } from './helper.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PathFindingService {
 
-  constructor() { }
+  constructor(private helper: HelperService) { }
  
   findCellWithLeastDanger(
     start: Cell,
@@ -63,10 +64,10 @@ export class PathFindingService {
         break;
       }
   
-      const neighbors = this.getNeighbors(closestCell, grid);
+      const neighbors = this.helper.calculateAdjacentCells(closestCell.position.row, closestCell.position.column);
   
       for (const neighbor of neighbors) {
-        const alt = distances[closestCell.position.row][closestCell.position.column].distance + 1; // Assuming each step has a distance of 1
+        const alt = distances[closestCell.position.row][closestCell.position.column].distance + 1;
         if (alt < distances[neighbor.position.row][neighbor.position.column].distance) {
           distances[neighbor.position.row][neighbor.position.column].distance = alt;
           distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
@@ -77,28 +78,89 @@ export class PathFindingService {
     return distances;
   }
   
- getNeighbors(cell: Cell, grid: Cell[][]): Cell[] {
-    const neighbors: Cell[] = [];
-    const numRows = grid.length;
-    const numCols = grid[0].length;
-  
-    const offsets = [
-      { row: -1, col: 0 },
-      { row: 1, col: 0 },
-      { row: 0, col: -1 },
-      { row: 0, col: 1 },
-    ];
-  
-    for (const offset of offsets) {
-      const newRow = cell.position.row + offset.row;
-      const newCol = cell.position.column + offset.col;
-  
-      if (newRow >= 0 && newRow < numRows && newCol >= 0 && newCol < numCols) {
-        neighbors.push(grid[newRow][newCol]);
-      }
-    }
-  
-    return neighbors;
-  }
   
 }
+
+
+//Mubin
+// function findPath(startX: number, startY: number, targetX: number, targetY: number) {
+//     const openList = []; // Priority queue of open nodes
+//     const closedList = new Set(); // Set of closed nodes
+
+//     const startNode = new Node(startX, startY);
+//     const targetNode = new Node(targetX, targetY);
+
+//     openList.push(startNode);
+
+//     while (openList.length > 0) {
+//         // Find the node with the lowest f score in the open list
+//         const currentNode = openList.reduce((minNode, node) =>
+//             node.f < minNode.f ? node : minNode, openList[0]);
+
+//         // Remove the current node from the open list
+//         openList.splice(openList.indexOf(currentNode), 1);
+
+//         // Add the current node to the closed list
+//         closedList.add(${currentNode.x}-${currentNode.y});
+
+//         // Check if we've reached the target
+//         if (currentNode.x === targetNode.x && currentNode.y === targetNode.y) {
+//             const path = [];
+//             let current = currentNode;
+
+//             while (current) {
+//                 path.unshift({ x: current.x, y: current.y });
+//                 current = current.parent;
+//             }
+
+//             return path;
+//         }
+
+//         // Generate neighbor nodes
+//         const neighbors = [
+//             { x: currentNode.x - 1, y: currentNode.y },
+//             { x: currentNode.x + 1, y: currentNode.y },
+//             { x: currentNode.x, y: currentNode.y - 1 },
+//             { x: currentNode.x, y: currentNode.y + 1 },
+//         ];
+
+//         for (const neighbor of neighbors) {
+//             const [nx, ny] = [neighbor.x, neighbor.y];
+
+//             // Skip if neighbor is out of bounds or in closed list
+//             if (
+//                 nx < 0 || nx >= 10 ||
+//                 ny < 0 || ny >= 10 ||
+//                 closedList.has(${nx}-${ny})
+//             ) {
+//                 continue;
+//             }
+
+//             if (!recordedPositions[ny].some(cell => cell.x === nx && cell.y === ny) && !(nx === targetX && ny === targetY)) {
+//                 continue;
+//             }
+
+//             // Calculate tentative g score
+//             const gScore = currentNode.g + 1; // Assuming uniform cost
+
+//             // Check if neighbor is not in the open list or has a lower g score
+//             let neighborNode = openList.find(node => node.x === nx && node.y === ny);
+
+//             if (!neighborNode || gScore < neighborNode.g) {
+//                 if (!neighborNode) {
+//                     neighborNode = new Node(nx, ny);
+//                     openList.push(neighborNode);
+//                 }
+
+//                 neighborNode.parent = currentNode;
+//                 neighborNode.g = gScore;
+//                 neighborNode.h = calculateHeuristic(nx, ny, targetX, targetY);
+//             }
+//         }
+//     }
+// }
+
+// // Calculate Manhattan distance heuristic
+// function calculateHeuristic(x1: number, y1: number, x2: number, y2: number) {
+//     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+// }

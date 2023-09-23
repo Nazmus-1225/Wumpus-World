@@ -14,7 +14,7 @@ export class SettingsComponent implements OnInit {
   constructor(public router: Router,private generateGame: GenerateGameService,private evaluate:EvaluateService) { }
   fileContent: string = "";
   sliderGrid= "10x10";
-  sliderPit = 2;
+  sliderPit = 5;
   sliderWumpus = 1;
   sliderGold = 1;
 

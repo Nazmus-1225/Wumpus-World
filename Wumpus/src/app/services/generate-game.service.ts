@@ -181,3 +181,50 @@ export class GenerateGameService {
     }
   }
 }
+
+function boardToString(board: Cell[][]): string {
+  let result = '';
+  for (let row = 0; row < board.length; row++) {
+    for (let col = 0; col < board[row].length; col++) {
+      const cellType = board[row][col].type;
+      result += `${cellType}\t`; // Separate with a tab
+    }
+    result += '\n'; // Newline after each row
+  }
+  return result;
+}
+
+function stringToBoard(boardString: string): Cell[][] {
+  const rows = boardString.trim().split('\n');
+  const board: Cell[][] = [];
+
+  for (const row of rows) {
+    const cellTypes = row.trim().split('\t');
+    const boardRow: Cell[] = [];
+
+    for (const cellType of cellTypes) {
+      // Parse the cellType and create a new Cell object
+      const cell: Cell = {
+        type: parseInt(cellType),
+        position: {
+          row: 0,
+          column: 0
+        },
+        isHidden: false,
+        hasBreeze: false,
+        hasSmell: false,
+        hasLight: false,
+        wumpus_probability: 0,
+        pit_probability: 0,
+        treasure_probability: 0,
+        risk_score: 0
+      };
+      boardRow.push(cell);
+    }
+
+    board.push(boardRow);
+  }
+
+  return board;
+}
+
