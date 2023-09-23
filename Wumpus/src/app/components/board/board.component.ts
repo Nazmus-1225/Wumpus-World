@@ -23,7 +23,7 @@ export class BoardComponent implements OnInit {
   board: Cell[][] = [];
   player: Player = new Player();
   treasure_left: number= this.generateGame.treasure_left;
-
+  buttonsPressed: boolean = false;
 // Add these properties to your component class
 isHumanMode: boolean = false;
 private gameInterval: any;
@@ -34,7 +34,8 @@ isPauseButtonVisible : boolean=false;
 startAsHuman() {
   this.isHumanMode = true;
   this.isPauseButtonVisible= false;
-  console.log("h")
+  console.log("h");
+  this.buttonsPressed = true;
   // Add any other logic you need when starting as a Human
 }
 
@@ -43,13 +44,15 @@ startAsAI() {
   this.isHumanMode = false;
   this.isPauseButtonVisible= true;
   this.playGame();
-  console.log("a")
+  console.log("a");
+  this.buttonsPressed = true;
   // Add any other logic you need when starting as an AI
 }
 
   ngOnInit(): void {
     //  this.player = this.AI.player;
-    
+    this.AI.player.point=100;
+    this.treasure_left=this.generateGame.treasure_left;
     this.initializeBoard();
     this.board = this.generateGame.getBoard();
     this.generateGame.placePitsWumpusTreasure();
