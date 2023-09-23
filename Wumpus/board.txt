@@ -1,0 +1,10 @@
+S S S SG breeze stench W stench S S
+S S S breeze P breeze stench S S S
+S S S S breeze S S SG S S
+S S S S S S S S S S
+S S breeze S S S S S S S
+S breeze P breeze S S S S S S
+S S breeze S S S S S breeze S
+S S S S S S S breeze P breezeG
+S S S S S S S S breeze S
+S S SG S S S S S S S
