@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { GenerateGameService } from './generate-game.service';
 import { Player } from '../models/player.model';
 import { Cell, CellType } from '../models/cell';
-import { EvaluateService } from './evaluate.service';
 import { HelperService } from './helper.service';
 
 @Injectable({
@@ -87,6 +86,24 @@ export class AIService {
 
   }
 
+  grabTreasure(row: number, col: number) {
+    if (this.generateGame.board[row][col].type === CellType.Treasure) {
+      this.generateGame.board[row][col].isHidden = false;
+      alert("You got a treasure!");
+      this.generateGame.board[row][col].type = CellType.Empty;
+      //remove light from adjacents
+      const adjacentCells = this.helper.calculateAdjacentCells(row, col);
+      for (const adjacentCell of adjacentCells) {
+        if (adjacentCell.type === CellType.Light) {
+          adjacentCell.type = CellType.Empty;
+          const adjacentRow = adjacentCell.position.row;
+          const adjacentCol = adjacentCell.position.column;
+          this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
+        }
+      }
+    }
+
+  }
 
 
 }

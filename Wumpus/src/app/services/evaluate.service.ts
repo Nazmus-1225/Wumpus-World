@@ -29,6 +29,9 @@ export class EvaluateService {
       case CellType.Treasure:
         cell.treasure_probability = 1;
         cell.risk_score = -1;
+        setTimeout(() => {
+          this.AI.grabTreasure(row, col);
+        }, 1000); 
         break;
 
       case CellType.Wumpus:
@@ -169,9 +172,14 @@ export class EvaluateService {
     if (this.generateGame.board[row][col].type == CellType.Treasure) {
       this.AI.player.point += 1000;
       this.AI.exploredBoard[row][col] = this.generateGame.board[row][col];
-      this.showMessage("Congratulations! You found the Treasure.");
-      this.isGameOver = true;
-      return;
+      this.generateGame.treasure_left--;
+      console.log(this.generateGame.treasure_left)
+      if(this.generateGame.treasure_left===0){
+        this.showMessage("Congratulations! You found all the Treasure.");
+        this.isGameOver = true;
+        return;
+      }
+     
     }
 
     else if (this.generateGame.board[row][col].type == CellType.Wumpus) {

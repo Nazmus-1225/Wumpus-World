@@ -22,6 +22,7 @@ export class BoardComponent implements OnInit {
     
   board: Cell[][] = [];
   player: Player = new Player();
+  treasure_left: number= this.generateGame.treasure_left;
 
 // Add these properties to your component class
 isHumanMode: boolean = false;
@@ -180,6 +181,8 @@ revealBoard(){
 
       this.evaluate.updateScore(rowIndex, colIndex);
       this.evaluate.updateRisk(rowIndex,colIndex); 
+      this.treasure_left= this.generateGame.treasure_left;
+
       
       this.board[rowIndex][colIndex]=this.AI.exploredBoard[rowIndex][colIndex];
       this.generateGame.board[rowIndex][colIndex].risk_score =this.AI.exploredBoard[rowIndex][colIndex].risk_score;

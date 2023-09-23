@@ -9,12 +9,14 @@ export class GenerateGameService {
   wumpus_count: number = 1;
   pit_count: number = 2;
   treasure_count: number = 1;
+  treasure_left: number =1;
 
   constructor() {
     // Retrieve values from localStorage, use default values if not found
     this.wumpus_count = parseInt(localStorage.getItem('wumpus_count') || '1', 10);
     this.pit_count = parseInt(localStorage.getItem('pit_count') || '2', 10);
     this.treasure_count = parseInt(localStorage.getItem('treasure_count') || '1', 10);
+    this.treasure_left=this.treasure_count;
   }
 
   getBoard(): Cell[][] {
@@ -34,7 +36,7 @@ export class GenerateGameService {
     this.treasure_count = treasure_count;
   }
 
-  
+
   placePitsWumpusTreasure(): void {
     this.placeRandomElements(CellType.Pit, this.pit_count); // Place 5 pits
     this.placeRandomElements(CellType.Wumpus, this.wumpus_count); // Place 1 Wumpus

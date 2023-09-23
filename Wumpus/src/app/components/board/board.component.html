@@ -1,6 +1,7 @@
 <div class="game-container">
   <div class="left-side">
     <h2>Score: {{ player.point }}</h2>
+    <h3>Treasure left: {{treasure_left}}</h3>
     <h3 [innerText]="player.hasArrow ? 'Arrow: 1' : 'Arrow: 0'"></h3>
   </div>
   <div class="board">
