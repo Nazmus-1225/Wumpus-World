@@ -5,6 +5,7 @@ import { AIService } from './ai.service';
 import { Cell, CellType } from '../models/cell';
 import { MessageModalComponent } from '../components/message-modal/message-modal.component';
 import { Player } from 'src/app/models/player.model';
+import { HelperService } from './helper.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,15 +13,16 @@ export class EvaluateService {
 
   constructor(private dialog: MatDialog,
     private generateGame: GenerateGameService,
-    private AI: AIService) { }
-    player: Player = new Player();
+    private AI: AIService,
+    private helper: HelperService) { }
+  player: Player = new Player();
 
- isGameOver: boolean = false;
+  isGameOver: boolean = false;
 
 
+  //Current cell risk
   updateRisk(row: number, col: number) {
     const cell = this.generateGame.board[row][col];
-   // console.log(row+" bla "+col);
     switch (cell.type) {
       case CellType.Treasure:
         cell.treasure_probability = 1;
@@ -39,70 +41,80 @@ export class EvaluateService {
         cell.pit_probability = 1;
         cell.risk_score = 1;
         break;
+
       case CellType.Light:
         cell.risk_score = -0.1;
         break;
       case CellType.Smell:
       case CellType.Breeze:
-    //  case CellType.BreezeAndSmell:
-    //  case CellType.Smell_Breeze_And_Light:
+        //  case CellType.BreezeAndSmell:
+        //  case CellType.Smell_Breeze_And_Light:
         cell.risk_score = 0.1;
         break;
-     // case CellType.Empty:
-    //  case CellType.DeadWumpus:
-    //  case CellType.SmellAndLight:
-    //  case CellType.BreezeAndLight:
-    //    cell.risk_score = 0.0;
-     //   break;
-      
 
+      case CellType.DeadWumpus:
+        cell.risk_score = 0;
+        break;
+
+      // case CellType.Empty:
+      //  case CellType.DeadWumpus:
+      //  case CellType.SmellAndLight:
+      //  case CellType.BreezeAndLight:
+      //    cell.risk_score = 0.0;
+      //   break;
 
     }
 
     this.generateGame.board[row][col] = cell
-    this.AI.exploredBoard[row][col] =  this.generateGame.board[row][col];
+    this.AI.exploredBoard[row][col] = this.generateGame.board[row][col];
 
-    const adjacentCells = this.calculateAdjacentCells(row,col);
-    
+    const adjacentCells = this.helper.calculateAdjacentCells(row, col);
+
     for (const offset of adjacentCells) {
-    //  console.log(offset.position.column+" "+offset.position.row)
-    //ekhane dondogol chhilo joddur bujchi...
-   // const adjacentRow = row + offset.position.row;
-   // const adjacentCol = col + offset.position.column;
-     const adjacentRow = offset.position.row;
-    const adjacentCol = offset.position.column;
-     // console.log(adjacentRow+" b "+adjacentCol)
+      // const adjacentRow = row + offset.position.row;
+      // const adjacentCol = col + offset.position.column;
+      const adjacentRow = offset.position.row;
+      const adjacentCol = offset.position.column;
       if (
         adjacentRow >= 0 && adjacentRow < this.generateGame.board.length &&
         adjacentCol >= 0 && adjacentCol < this.generateGame.board[0].length
       ) {
         const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol];
-        console.log(adjacentCell.position.row+" bla "+adjacentCell.position.column);
-        this.updateAdjacentRisk(adjacentCell,cell.type);
+
+        // if(adjacentCell.isHidden)     
+
+        this.updateAdjacentRisk(adjacentCell, cell.type);
+
       }
     }
   }
 
-  updateAdjacentRisk(adjacentCell: Cell,currentCellType:CellType) {
-  //  console.log("hi");
-    if (adjacentCell.isHidden) { // reveal board korle !adjacentCell.isHidden eita condition dis
-      switch (currentCellType) {
-        case CellType.Breeze:
+  updateAdjacentRisk(adjacentCell: Cell, currentCellType: CellType) {
 
+    if (adjacentCell.isHidden) {
+      switch (currentCellType) {
+        case CellType.Empty:
+          adjacentCell.pit_probability = 0.0;
+          adjacentCell.wumpus_probability = 0.0;
+          adjacentCell.treasure_probability = 0.0;
+          adjacentCell.risk_score = 0.0;
+          break;
+
+        // case CellType.DeadWumpus:
+        //   break;
+
+        case CellType.Breeze:
           adjacentCell.pit_probability += 0.2;
-          console.log("br pai");
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
           break;
 
         case CellType.Smell:
           adjacentCell.wumpus_probability += 0.3;
-          console.log("sm pai");
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
           break;
 
         case CellType.Light:
           adjacentCell.treasure_probability -= 0.3;
-          console.log("lg pai");
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
           break;
 
@@ -130,13 +142,19 @@ export class EvaluateService {
           adjacentCell.treasure_probability -= 0.2;
           adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
           break;
-        case CellType.Empty:
-          adjacentCell.pit_probability =0.0;
-          adjacentCell.wumpus_probability =0.0;
-          adjacentCell.treasure_probability =0.0;
-          adjacentCell.risk_score = 0.0;
-          break;
       }
+    }
+
+    else {
+      adjacentCell.risk_score += 0.01
+
+      // switch (currentCellType) {
+      //   case CellType.Empty:
+      //   case CellType.DeadWumpus:
+      //     adjacentCell.wumpus_probability = 0.0;
+      //     adjacentCell.risk_score = 0.0;
+      //     break;
+      // }
     }
 
     const adjacentRow = adjacentCell.position.row;
@@ -145,34 +163,9 @@ export class EvaluateService {
   }
 
 
-  calculateAdjacentCells(row:number,col:number): Cell[] {
-  //  const { row, col } = this.player.position;
-    const adjacentCellPositions = [
-      { row: row - 1, col },
-      { row: row + 1, col },
-      { row, col: col - 1 },
-      { row, col: col + 1 },
-    ];
 
-    const validAdjacentCellPositions = adjacentCellPositions.filter((position) =>
-      this.isValidCellPosition(position.row, position.col)
-    );
 
-    const adjacentCells = validAdjacentCellPositions.map((position) =>
-      this.generateGame.board[position.row][position.col]
-    );
 
-    return adjacentCells;
-  }
-
-  isValidCellPosition(row: number, col: number): boolean {
-    return (
-      row >= 0 &&
-      row < this.generateGame.board.length &&
-      col >= 0 &&
-      col < this.generateGame.board[0].length
-    );
-  }
 
   updateScore(row: number, col: number) {
     this.AI.player.point -= 1;
@@ -220,7 +213,6 @@ export class EvaluateService {
     dialogRef.disableClose = true;
   }
   revealBoard() {
-    // Iterate through your board and set the isHidden property of each cell to false
     for (let row of this.generateGame.board) {
       for (let cell of row) {
         cell.isHidden = false;
@@ -228,8 +220,8 @@ export class EvaluateService {
     }
   }
   gameOver() {
-    if (this.AI.player.point <= 80) {
-      console.log("mara kha"+this.AI.player.point);
+    if (this.AI.player.point <= 0) {
+      console.log("mara kha" + this.AI.player.point);
       this.showMessage('Sorry. No moves left. Game Over.');
       this.isGameOver = true;
       this.revealBoard();

@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Cell, CellType } from 'src/app/models/cell';
 import { Player } from 'src/app/models/player.model';
-import { MatDialog } from '@angular/material/dialog';
 import { GenerateGameService } from 'src/app/services/generate-game.service';
 import { AIService } from 'src/app/services/ai.service';
 import { EvaluateService } from 'src/app/services/evaluate.service';
+import { HelperService } from 'src/app/services/helper.service';
 
 @Component({
   selector: 'app-board',
@@ -13,10 +13,11 @@ import { EvaluateService } from 'src/app/services/evaluate.service';
 })
 export class BoardComponent implements OnInit {
 
-  constructor(private dialog: MatDialog,
+  constructor(
     private generateGame: GenerateGameService,
     private AI: AIService,
-    private evaluate: EvaluateService) { }
+    private evaluate: EvaluateService,
+    private helper: HelperService) { }
 
   board: Cell[][] = [];
   player: Player = new Player();
@@ -57,14 +58,18 @@ export class BoardComponent implements OnInit {
           hasBreeze: false,
           hasSmell: false,
           hasLight: false,
-          risk_score: 0,
+         
           position: {
             row: row,
             column: col
           },
-          wumpus_probability: 0.0,
-          pit_probability: 0.0,
-          treasure_probability: 0.0
+          wumpus_probability: 0.01, // 1 out of 100
+          pit_probability: 0.05,  // 5 out of 100
+          treasure_probability: 0.01,  // 1 out of 100
+          risk_score: 0
+          // + 0.01  // wumpus_probability
+          // + 0.05  // pit_probability
+          // - 0.01  // treasure_probability
         });
       }
       this.generateGame.board.push(newRow);
@@ -73,7 +78,7 @@ export class BoardComponent implements OnInit {
     this.generateGame.board[0][9].isHidden = false;
     this.AI.exploredBoard[0][0] = this.generateGame.board[0][0];
 
-    this.AI.availableCells = this.calculateAdjacentCells();
+    this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
   }
 
   getCellImage(cellType: CellType): string {
@@ -110,16 +115,17 @@ export class BoardComponent implements OnInit {
     }
   }
 
-
   revealCell(rowIndex: number, colIndex: number): void {
     // console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
 
     if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
-      this.generateGame.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
+      this.generateGame.board[rowIndex][colIndex].risk_score +=0.01; //visited gets less priority
+      console.log("Risk score: "+this.generateGame.board[rowIndex][colIndex].risk_score);
+
       this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
 
-      this.AI.availableCells = this.calculateAdjacentCells();
+      this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
 
       this.evaluate.updateScore(rowIndex, colIndex);
@@ -133,17 +139,15 @@ export class BoardComponent implements OnInit {
   }
 
   isMoveAvailable(rowIndex: number, colIndex: number): boolean {
-    const adjacentCells = this.calculateAdjacentCells();
+    const adjacentCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
     return adjacentCells.some(
       (move) => move.position.row === rowIndex && move.position.column === colIndex
     );
   }
 
-
-  shootArrow(row: number, col: number) {
+  AIshootArrow(row: number, col: number) {
     this.AI.shootArrow(row, col);
   }
-
 
   getCellTypeString(cellType: CellType): string {
     switch (cellType) {
@@ -179,36 +183,6 @@ export class BoardComponent implements OnInit {
         return "Unknown";
     }
   }
-
-  calculateAdjacentCells(): Cell[] {
-    const { row, col } = this.player.position;
-    const adjacentCellPositions = [
-      { row: row - 1, col },
-      { row: row + 1, col },
-      { row, col: col - 1 },
-      { row, col: col + 1 },
-    ];
-
-    const validAdjacentCellPositions = adjacentCellPositions.filter((position) =>
-      this.isValidCellPosition(position.row, position.col)
-    );
-
-    const adjacentCells = validAdjacentCellPositions.map((position) =>
-      this.generateGame.board[position.row][position.col]
-    );
-
-    return adjacentCells;
-  }
-
-  isValidCellPosition(row: number, col: number): boolean {
-    return (
-      row >= 0 &&
-      row < this.generateGame.board.length &&
-      col >= 0 &&
-      col < this.generateGame.board[0].length
-    );
-  }
-  
 
 
 }

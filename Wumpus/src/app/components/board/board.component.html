@@ -23,12 +23,9 @@
 
   <div class="shoot-buttons-container">
     <p>Shoot Arrow</p>
-    <button class="shoot-button" (click)="shootArrow(player.position.row - 1, player.position.col)">Left</button>
-    <button class="shoot-button" (click)="shootArrow(player.position.row + 1, player.position.col)">Right</button>
-    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.col + 1)">Down</button>
-    <button class="shoot-button" (click)="shootArrow(player.position.row, player.position.col - 1)">Up</button>
+    <button class="shoot-button" (click)="AIshootArrow(player.position.row - 1, player.position.col)">Left</button>
+    <button class="shoot-button" (click)="AIshootArrow(player.position.row + 1, player.position.col)">Right</button>
+    <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col + 1)">Down</button>
+    <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col - 1)">Up</button>
   </div>
-  <!-- <div class="reveal-button-container">
-    <button class="reveal-button" (click)="revealBoard()">Reveal Board</button>
-  </div> -->
 </div>

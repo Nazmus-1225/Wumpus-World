@@ -6,17 +6,20 @@ import { Cell, CellType } from '../models/cell';
 })
 export class GenerateGameService {
   board: Cell[][] = [];
+  wumpus_count: number = 1;
+  pit_count: number = 5;
+  treasure_count: number = 1;
 
   constructor() { }
 
-  getBoard(): Cell[][]{
+  getBoard(): Cell[][] {
     return this.board;
   }
 
   placePitsWumpusTreasure(): void {
-    this.placeRandomElements(CellType.Pit, 5); // Place 5 pits
-    this.placeRandomElements(CellType.Wumpus, 1); // Place 1 Wumpus
-    this.placeRandomElements(CellType.Treasure, 1); // Place 1 treasure
+    this.placeRandomElements(CellType.Pit, this.pit_count); // Place 5 pits
+    this.placeRandomElements(CellType.Wumpus, this.wumpus_count); // Place 1 Wumpus
+    this.placeRandomElements(CellType.Treasure, this.treasure_count); // Place 1 treasure
   }
 
   placeRandomElements(elementType: CellType, count: number): void {
@@ -36,7 +39,6 @@ export class GenerateGameService {
 
     this.calculateBreezeSmellAndLight();
   }
-
 
   calculateBreezeSmellAndLight(): void {
     this.generateCellTypes(CellType.Pit);
