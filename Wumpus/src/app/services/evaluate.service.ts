@@ -31,7 +31,7 @@ export class EvaluateService {
         cell.risk_score = -1;
         setTimeout(() => {
           this.AI.grabTreasure(row, col);
-        }, 1000); 
+        }, 500); 
         break;
 
       case CellType.Wumpus:

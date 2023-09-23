@@ -121,7 +121,7 @@ revealBoard(){
       this.AI.exploredBoard.push(newRow);
     }
     this.generateGame.board[0][9].isHidden = false;
-    this.AI.exploredBoard[0][0] = this.generateGame.board[0][0];
+    this.AI.exploredBoard[0][9] = this.generateGame.board[0][9];
 
     this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
   }
