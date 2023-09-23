@@ -1,0 +1,64 @@
+<div class="container">
+    <h1>Game Settings</h1>
+    <div class="row">
+      <div class="col">
+        <h3 id="wumpus">Wumpus</h3>
+        <div class="gameGrid" >
+          <input
+            type="range"
+            min="1"
+            max="5"
+            value="1"
+            class="slider"
+            id="gridRange"
+            (input)="wumpus($event)"
+          />
+          <h2 id="gridSize">{{ sliderWumpus }}</h2>
+        </div>
+        
+      </div>
+      <div class="col">
+          <h3 id="gold">Gold</h3>
+          <div class="gameGrid" >
+          <input
+            type="range"
+            min="1"
+            max="5"
+            value="1"
+            class="slider"
+            id="gridRange"
+            (input)="gold($event)"
+          />
+          <h2 id="gridSize">{{ sliderGold }}</h2>
+          </div>
+          <h3 id="pits">Pits</h3>
+        <div class="gameGrid" >
+          <input
+            type="range"
+            min="2"
+            max="6"
+            value="2"
+            class="slider"
+            id="gridRange"
+            (input)="pits($event)"
+          />
+          <h2 id="gridSize">{{ sliderPit }}</h2>
+        </div>
+      </div>
+      <div class="container2">
+        <div class="custom">
+          <h5>Or</h5>
+          <br>
+          <h2 class="customLine">Enter Your Custom Board</h2>
+          <div class="mb-3 file-input">
+            <input class="form-control form-control-sm" id="formFileSm" type="file" (change)="onChange($event)">
+          </div>
+        </div>
+        <div class="start">
+          <button class="button-start" (click)="startGame()">
+            <h2 id="start">START</h2>
+          </button>
+        </div>
+      </div>
+      
+  </div>
