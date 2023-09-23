@@ -1,5 +1,14 @@
 
-body {
+/* body {
     background-color: #cbcef8;
-  }
+  } */
   
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito+Sans:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&family=Ubuntu:wght@700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap');
+  
+  body{
+      background-color: #283e5c;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-image: url("assets/background1.jpg");
+  }

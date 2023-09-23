@@ -6,6 +6,7 @@ import { Cell, CellType } from '../models/cell';
 import { MessageModalComponent } from '../components/message-modal/message-modal.component';
 import { Player } from 'src/app/models/player.model';
 import { HelperService } from './helper.service';
+import { Router } from '@angular/router';
 @Injectable({
   providedIn: 'root'
 })
@@ -14,7 +15,8 @@ export class EvaluateService {
   constructor(private dialog: MatDialog,
     private generateGame: GenerateGameService,
     private AI: AIService,
-    private helper: HelperService) { }
+    private helper: HelperService,
+    private router: Router) { }
   player: Player = new Player();
 
   isGameOver: boolean = false;
@@ -202,7 +204,7 @@ export class EvaluateService {
       data: { message }
     })
     dialogRef.afterClosed().subscribe(() => {
-      window.location.reload();
+      this.router.navigate(['settings']);
     });
     dialogRef.disableClose = true;
   }
@@ -215,7 +217,7 @@ export class EvaluateService {
   }
   gameOver() {
     if (this.AI.player.point <= 0) {
-      console.log("mara kha" + this.AI.player.point);
+   //   console.log("mara kha" + this.AI.player.point);
       this.showMessage('Sorry. No moves left. Game Over.');
       this.isGameOver = true;
       this.revealBoard();

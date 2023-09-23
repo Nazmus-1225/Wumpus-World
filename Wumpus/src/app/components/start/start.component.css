@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito+Sans:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&family=Ubuntu:wght@700&display=swap');
+
+.main{
+    /* width: 100vw;
+    height: 100vh; */
+    display: flex;
+    flex-direction: column;
+    /* background-repeat: no-repeat;
+    background-size: contain;*/
+    
+}
+
+.headPlay{
+    margin-top: 10%;
+    margin-left: 50%;
+}
+
+
+.heading{
+    height: 270px;
+    width: auto;
+    z-index: 1;
+    /* margin-left: 52%;
+    margin-top: 10%; */
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url("../../../assets/wumpusName.svg");
+}
+
+
+.play {
+    display: block;
+    margin-left: 25%;
+    margin-top: 10%;
+    background: #3e5a80;
+    border: 0 solid #E2E8F0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+    color: #afd136;
+    font-family: Ubuntu, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    height: 80px;
+    width: 200px;
+    line-height: 24px;
+    overflow-wrap: break-word;
+    padding: 24px;
+    text-decoration: none;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.wumpus{
+    height: 80vh;
+    width: 60vw;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background-image: url("../../../assets/onlyWumpus.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+}

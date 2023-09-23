@@ -55,7 +55,7 @@
   margin: auto;
 }
 
-.shoot-buttons-container {
+.shoot-buttons-container,.start-buttons-container {
   display: flex;
   width: 120px;
   flex-direction: column;
@@ -74,7 +74,7 @@
   margin-bottom: 8px;
 }
 
-.shoot-button {
+.shoot-button,.start-button {
   display: flex;
   align-items: center;
   padding: 8px 16px;
@@ -87,11 +87,11 @@
   transition: background-color 0.3s, transform 0.2s;
 }
 
-.shoot-button i {
+.shoot-button i,.start-button i {
   margin-right: 8px;
 }
 
-.shoot-button:hover {
+.shoot-button:hover,.start-button:hover {
   background-color: #0056b3;
   transform: scale(1.05);
 }

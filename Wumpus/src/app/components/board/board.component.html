@@ -19,13 +19,22 @@
       </div>
     </div>
   </div>
-
-  <div class="shoot-buttons-container">
+  <div class="start-buttons-container">
+    <!-- Start button options -->
+    <div class="start-buttons-container">
+      <!-- Start button options -->
+      <button class="start-button" (click)="startAsHuman()" >Start as Human</button>
+      <button class="start-button" (click)="startAsAI()" >Start as AI</button>
+    </div>
+    <button class="shoot-button" (click)="revealBoard()">re</button>
+  </div>
+  <div class="shoot-buttons-container" *ngIf="isHumanMode">
     <p>Shoot Arrow</p>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row - 1, player.position.col)">Left</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row + 1, player.position.col)">Right</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col + 1)">Down</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col - 1)">Up</button>
+
   </div>
 
   <div class="game-controls">

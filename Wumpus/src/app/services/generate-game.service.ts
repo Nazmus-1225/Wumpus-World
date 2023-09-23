@@ -7,15 +7,32 @@ import { Cell, CellType } from '../models/cell';
 export class GenerateGameService {
   board: Cell[][] = [];
   wumpus_count: number = 1;
-  pit_count: number = 5;
+  pit_count: number = 2;
   treasure_count: number = 1;
 
-  constructor() { }
+  constructor() {
+    // Retrieve values from localStorage, use default values if not found
+    this.wumpus_count = parseInt(localStorage.getItem('wumpus_count') || '1', 10);
+    this.pit_count = parseInt(localStorage.getItem('pit_count') || '2', 10);
+    this.treasure_count = parseInt(localStorage.getItem('treasure_count') || '1', 10);
+  }
 
   getBoard(): Cell[][] {
     return this.board;
   }
 
+  setwumpusCount(wumpus_count: number){
+    console.log("Wumpus Count " + wumpus_count);
+    this.wumpus_count = wumpus_count;
+  }
+
+  setpitCount(pit_count: number){
+    this.pit_count = pit_count;
+  }
+  setgoldCount(treasure_count: number){
+    console.log("Gold count " + treasure_count);
+    this.treasure_count = treasure_count;
+  }
   placePitsWumpusTreasure(): void {
     this.placeRandomElements(CellType.Pit, this.pit_count); // Place 5 pits
     this.placeRandomElements(CellType.Wumpus, this.wumpus_count); // Place 1 Wumpus

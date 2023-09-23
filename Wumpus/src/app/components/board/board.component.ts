@@ -19,35 +19,60 @@ export class BoardComponent implements OnInit {
     private AI: AIService,
     private evaluate: EvaluateService,
     private helper: HelperService) { }
-
+    
   board: Cell[][] = [];
   player: Player = new Player();
-  isGamePaused: boolean=false;
-  gameInterval: any; 
 
+// Add these properties to your component class
+isHumanMode: boolean = false;
+private gameInterval: any;
+
+// Function to start as Human
+startAsHuman() {
+  this.isHumanMode = true;
+  console.log("h")
+  // Add any other logic you need when starting as a Human
+}
+
+// Function to start as AI
+startAsAI() {
+  this.isHumanMode = false;
+  this.playGame();
+  console.log("a")
+  // Add any other logic you need when starting as an AI
+}
 
   ngOnInit(): void {
     //  this.player = this.AI.player;
+    
     this.initializeBoard();
     this.board = this.generateGame.getBoard();
-    this.generateGame.placePitsWumpusTreasure();  //get the board
-    this.playGame(); // not implemented yet
+    this.generateGame.placePitsWumpusTreasure();
+      //get the board
+   // this.playGame(); // not implemented yet
+   // console.log('BoardComponent initialized');
 
   }
-
+revealBoard(){
+  this.evaluate.revealBoard();
+}
   playGame() {
+    this.gameInterval = setInterval(() => {
+      if (!this.evaluate.isGameOver) {
     this.gameInterval = setInterval(() => {
       if (!this.evaluate.isGameOver && !this.isGamePaused) {
         this.evaluate.gameOver();
         const { row, column } = this.AI.makeAIMove();
         this.revealCell(row, column);
       } else {
-        clearInterval(this.gameInterval);
+        clearInterval(this.this.gameInterval);
         this.evaluate.isGameOver = true;
       }
     }, 1000); // Move after every 3 seconds
   }
-
+  ngOnDestroy(): void {
+    clearInterval(this.gameInterval); // Stop the game interval
+  }
 
 
   togglePause() {
