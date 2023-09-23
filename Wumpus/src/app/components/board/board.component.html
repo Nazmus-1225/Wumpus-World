@@ -5,8 +5,7 @@
   </div>
   <div class="board">
     <div *ngFor="let row of board; let rowIndex = index" class="row">
-      <div *ngFor="let cell of row; let colIndex = index" class="cell"
-      (click)="revealCell(rowIndex, colIndex)">
+      <div *ngFor="let cell of row; let colIndex = index" class="cell" (click)="revealCell(rowIndex, colIndex)">
 
         <div class="image-container">
           <div class="cell overlay-image" *ngIf="!cell.isHidden && cell.hasLight"></div>
@@ -27,5 +26,10 @@
     <button class="shoot-button" (click)="AIshootArrow(player.position.row + 1, player.position.col)">Right</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col + 1)">Down</button>
     <button class="shoot-button" (click)="AIshootArrow(player.position.row, player.position.col - 1)">Up</button>
+  </div>
+
+  <div class="game-controls">
+    <button (click)="togglePause()" [disabled]="isGamePaused">Pause</button>
+    <button (click)="togglePause()" [disabled]="!isGamePaused">Resume</button>
   </div>
 </div>

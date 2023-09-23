@@ -15,27 +15,28 @@ export class AIService {
     private generateGame: GenerateGameService,
     private helper: HelperService
   ) { }
-  
+
   randomRow: number = 0;
   randomCol: number = 0;
   player: Player = new Player();
-  availableCells: Cell[] = [];
+  availableCells: Cell[] = [];  //Updated in board.ts -> revealCell
   arrowShot = false;
   exploredBoard: Cell[][] = [];
 
   makeAIMove(): { row: number, column: number } {
     if (this.availableCells.length > 0) {
 
+      //Shoot wumpus
       for (const cell of this.availableCells) {
-        //     console.log(cell.position.row+"    "+cell.position.column+"   ")
         if (cell.wumpus_probability > 0.8 && !this.arrowShot) {
           this.shootArrow(cell.position.row, cell.position.column);
           this.arrowShot = true;
           return { row: -1, column: -1 };
         }
       }
+
       let lowestRiskCell = this.availableCells[0];
-      console.log("Risk score: ");
+      console.log("Adjacent Risk score: ");
       for (const cell of this.availableCells) {
         console.log(cell.risk_score);
 

@@ -21,7 +21,8 @@ export class Rules {
 //8. if chance of treasure>=90% -> pick it  (confirm)
 
 
-//Flag_Score
-//-100 for pit/wumpus
-//+100 for treasure
-//-10 for visited
+//Path Finding
+// Check all the unvisited adjecents
+//Find best path and go
+//path with visited cells only
+//run it after every move

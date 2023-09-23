@@ -12,6 +12,7 @@ import { HelperService } from 'src/app/services/helper.service';
   styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit {
+ 
 
   constructor(
     private generateGame: GenerateGameService,
@@ -21,6 +22,8 @@ export class BoardComponent implements OnInit {
 
   board: Cell[][] = [];
   player: Player = new Player();
+  isGamePaused: boolean=false;
+  gameInterval: any; 
 
 
   ngOnInit(): void {
@@ -33,16 +36,27 @@ export class BoardComponent implements OnInit {
   }
 
   playGame() {
-    const gameInterval = setInterval(() => {
-      if (!this.evaluate.isGameOver) {
+    this.gameInterval = setInterval(() => {
+      if (!this.evaluate.isGameOver && !this.isGamePaused) {
         this.evaluate.gameOver();
         const { row, column } = this.AI.makeAIMove();
         this.revealCell(row, column);
       } else {
-        clearInterval(gameInterval);
+        clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
     }, 1000); // Move after every 3 seconds
+  }
+
+
+
+  togglePause() {
+    this.isGamePaused = !this.isGamePaused; 
+    if (this.isGamePaused) {
+      clearInterval(this.gameInterval);
+    } else {
+      this.playGame();
+    }
   }
 
 
@@ -120,13 +134,19 @@ export class BoardComponent implements OnInit {
 
     if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
-      this.generateGame.board[rowIndex][colIndex].risk_score +=0.01; //visited gets less priority
-      console.log("Risk score: "+this.generateGame.board[rowIndex][colIndex].risk_score);
+
+
+      //kon board bujhtesi na
+      this.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
+      this.generateGame.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
+      this.AI.exploredBoard[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
 
       this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
 
       this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
+
+      console.log("Current Risk score: "+this.AI.exploredBoard[rowIndex][colIndex].risk_score);
 
       this.evaluate.updateScore(rowIndex, colIndex);
       this.evaluate.updateRisk(rowIndex,colIndex); 

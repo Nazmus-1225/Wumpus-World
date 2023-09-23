@@ -52,6 +52,7 @@ export class EvaluateService {
         cell.risk_score = 0.1;
         break;
 
+      case CellType.Empty:
       case CellType.DeadWumpus:
         cell.risk_score = 0;
         break;
@@ -66,26 +67,19 @@ export class EvaluateService {
     }
 
     this.generateGame.board[row][col] = cell
-    this.AI.exploredBoard[row][col] = this.generateGame.board[row][col];
+    this.AI.exploredBoard[row][col] = cell;
 
-    const adjacentCells = this.helper.calculateAdjacentCells(row, col);
+    const adjacentCells = this.helper.calculateAdjacentCells(row, col); //Cell format
 
     for (const offset of adjacentCells) {
-      // const adjacentRow = row + offset.position.row;
-      // const adjacentCol = col + offset.position.column;
       const adjacentRow = offset.position.row;
       const adjacentCol = offset.position.column;
-      if (
-        adjacentRow >= 0 && adjacentRow < this.generateGame.board.length &&
-        adjacentCol >= 0 && adjacentCol < this.generateGame.board[0].length
-      ) {
-        const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol];
+      
+      const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol]; //position only
 
-        // if(adjacentCell.isHidden)     
-
+      // if(adjacentCell.isHidden)     
         this.updateAdjacentRisk(adjacentCell, cell.type);
 
-      }
     }
   }
 
@@ -146,7 +140,7 @@ export class EvaluateService {
     }
 
     else {
-      adjacentCell.risk_score += 0.01
+      adjacentCell.risk_score += 0.05
 
       // switch (currentCellType) {
       //   case CellType.Empty:
