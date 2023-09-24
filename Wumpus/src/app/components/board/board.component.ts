@@ -169,6 +169,9 @@ revealBoard(){
     if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
 
+      this.AI.all_Unvisited_Cells = this.AI.all_Unvisited_Cells.filter((cell) => {
+        return cell.position.row !== rowIndex || cell.position.column !== colIndex;
+      });
 
       //kon board bujhtesi na
       this.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
@@ -179,6 +182,8 @@ revealBoard(){
 
       this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
+
+      
 
       console.log("Current Risk score: "+this.AI.exploredBoard[rowIndex][colIndex].risk_score);
 

@@ -3,6 +3,7 @@ import { GenerateGameService } from './generate-game.service';
 import { Player } from '../models/player.model';
 import { Cell, CellType } from '../models/cell';
 import { HelperService } from './helper.service';
+import { PathFindingService } from './path-finding.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +13,15 @@ export class AIService {
 
   constructor(
     private generateGame: GenerateGameService,
-    private helper: HelperService
+    private helper: HelperService,
+    private path: PathFindingService
   ) { }
 
   randomRow: number = 0;
   randomCol: number = 0;
   player: Player = new Player();
   availableCells: Cell[] = [];  //Updated in board.ts -> revealCell
+  all_Unvisited_Cells: Cell[] = [];
   arrowShot = false;
   exploredBoard: Cell[][] = [];
 
@@ -34,6 +37,7 @@ export class AIService {
         }
       }
 
+      //without path
       let lowestRiskCell = this.availableCells[0];
       console.log("Adjacent Risk score: ");
       for (const cell of this.availableCells) {
@@ -43,9 +47,31 @@ export class AIService {
           lowestRiskCell = cell;
         }
       }
-
-      console.log("row: " + lowestRiskCell.position.row + " column: " + lowestRiskCell.position.column);
       return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
+
+      //------------without path
+
+
+      //with path
+      // const newAdjacentUnvisitedCells = this.helper.calculateAdjacentUnvisitedCells(this.player.position.row, this.player.position.col);
+      // this.all_Unvisited_Cells.push(...newAdjacentUnvisitedCells);
+
+      // console.log(newAdjacentUnvisitedCells);
+
+      // const currentCell = this.generateGame.board[this.player.position.row][this.player.position.col];
+
+      // let lowestRiskCell = this.path.findCellWithLeastDanger(currentCell, this.all_Unvisited_Cells, this.generateGame.board);
+
+      // if (lowestRiskCell != null) {
+      //   console.log("row: " + lowestRiskCell.position.row + " column: " + lowestRiskCell.position.column);
+      //   return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
+      // }
+      // else
+      //   return { row: -1, column: -1 }
+
+      //----------------with path
+
+
     } else {
       clearInterval(this.aiInterval);
       return { row: -1, column: -1 };
