@@ -24,6 +24,7 @@ export class BoardComponent implements OnInit {
   player: Player = new Player();
   treasure_left: number= this.generateGame.treasure_left;
   buttonsPressed: boolean = false;
+  isBoardInteractive: boolean = true;
 // Add these properties to your component class
 isHumanMode: boolean = false;
 private gameInterval: any;
@@ -39,12 +40,12 @@ startAsHuman() {
   // Add any other logic you need when starting as a Human
 }
 
-// Function to start as AI
+
 startAsAI() {
   this.isHumanMode = false;
-  this.isPauseButtonVisible= true;
+  this.isPauseButtonVisible = true;
   this.playGame();
-  console.log("a");
+  this.isBoardInteractive = false; // Disable board interaction for AI
   this.buttonsPressed = true;
   // Add any other logic you need when starting as an AI
 }
@@ -205,6 +206,8 @@ revealBoard(){
       (move) => move.position.row === rowIndex && move.position.column === colIndex
     );
   }
+
+  
 
   AIshootArrow(row: number, col: number) {
     this.AI.shootArrow(row, col);
