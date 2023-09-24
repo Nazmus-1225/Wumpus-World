@@ -4,6 +4,7 @@ import { Player } from '../models/player.model';
 import { Cell, CellType } from '../models/cell';
 import { HelperService } from './helper.service';
 import { PathFindingService } from './path-finding.service';
+import { EvaluateService } from './evaluate.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,6 @@ export class AIService {
 
   makeAIMove(): { row: number, column: number } {
     if (this.availableCells.length > 0) {
-
       //Shoot wumpus
       for (const cell of this.availableCells) {
         if (cell.wumpus_probability > 0.8 && !this.arrowShot) {
@@ -36,6 +36,8 @@ export class AIService {
           return { row: -1, column: -1 };
         }
       }
+
+      // this.evaluate.updateRisk(this.player.position.row, this.player.position.col); 
 
       //without path
       let lowestRiskCell = this.availableCells[0];
@@ -47,6 +49,8 @@ export class AIService {
           lowestRiskCell = cell;
         }
       }
+      console.log("Lowest: "+lowestRiskCell.position.row+" , "+lowestRiskCell.position.column+" , "+lowestRiskCell.isHidden);
+      console.log("lowest risk: "+lowestRiskCell.risk_score);
       return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
 
       //------------without path
@@ -122,6 +126,20 @@ export class AIService {
       for (const adjacentCell of adjacentCells) {
         if (adjacentCell.type === CellType.Light) {
           adjacentCell.type = CellType.Empty;
+          const adjacentRow = adjacentCell.position.row;
+          const adjacentCol = adjacentCell.position.column;
+          this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
+        }
+
+        else if (adjacentCell.type === CellType.BreezeAndLight) {
+          adjacentCell.type = CellType.Breeze;
+          const adjacentRow = adjacentCell.position.row;
+          const adjacentCol = adjacentCell.position.column;
+          this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
+        }
+        
+        else if (adjacentCell.type === CellType.SmellAndLight) {
+          adjacentCell.type = CellType.Smell;
           const adjacentRow = adjacentCell.position.row;
           const adjacentCol = adjacentCell.position.column;
           this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;

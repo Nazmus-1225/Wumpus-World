@@ -31,7 +31,7 @@ export class EvaluateService {
         cell.risk_score = -1;
         setTimeout(() => {
           this.AI.grabTreasure(row, col);
-        }, 500); 
+        }, 500);
         break;
 
       case CellType.Wumpus:
@@ -52,7 +52,7 @@ export class EvaluateService {
         break;
       case CellType.Smell:
       case CellType.Breeze:
-        //  case CellType.BreezeAndSmell:
+      case CellType.BreezeAndSmell:
         //  case CellType.Smell_Breeze_And_Light:
         cell.risk_score = 0.1;
         break;
@@ -74,86 +74,89 @@ export class EvaluateService {
     this.generateGame.board[row][col] = cell
     this.AI.exploredBoard[row][col] = cell;
 
-    const adjacentCells = this.helper.calculateAdjacentCells(row, col); //Cell format
+    // const adjacentCells = this.helper.calculateAdjacentCells(row, col); //Cell format
+    const adjacentCells = this.AI.availableCells;
 
     for (const offset of adjacentCells) {
       const adjacentRow = offset.position.row;
       const adjacentCol = offset.position.column;
-      
+
       const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol]; //position only
 
-      // if(adjacentCell.isHidden)     
-        this.updateAdjacentRisk(adjacentCell, cell.type);
+      //  if (cell.isHidden)
+        this.updateAdjacentRisk(adjacentCell, cell);
 
     }
   }
 
-  updateAdjacentRisk(adjacentCell: Cell, currentCellType: CellType) {
+  updateAdjacentRisk(adjacentCell: Cell, currentCell: Cell) {
 
-    if (adjacentCell.isHidden) {
-      switch (currentCellType) {
-        case CellType.Empty:
-          adjacentCell.pit_probability = 0.0;
-          adjacentCell.wumpus_probability = 0.0;
-          adjacentCell.treasure_probability = 0.0;
-          adjacentCell.risk_score = 0.0;
-          break;
+    //eta barbar score baray ditese.....
+    if (adjacentCell.isHidden && currentCell.isHidden) {
+      console.log("cell: " + adjacentCell.position.row + "," + adjacentCell.position.column)
 
-        // case CellType.DeadWumpus:
-        //   break;
-
-        case CellType.Breeze:
-          adjacentCell.pit_probability += 0.2;
-          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-          break;
-
-        case CellType.Smell:
-          adjacentCell.wumpus_probability += 0.3;
-          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-          break;
-
-        case CellType.Light:
-          adjacentCell.treasure_probability -= 0.3;
-          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-          break;
-
-        case CellType.BreezeAndSmell:
-          adjacentCell.pit_probability += 0.2;
-          adjacentCell.wumpus_probability += 0.2;
-          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-          break;
-
-        case CellType.BreezeAndLight:
-          adjacentCell.pit_probability += 0.2;
-          adjacentCell.treasure_probability -= 0.2;
-          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-          break;
-
-        case CellType.SmellAndLight:
-          adjacentCell.wumpus_probability += 0.2;
-          adjacentCell.treasure_probability -= 0.2;
-          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-          break;
-
-        case CellType.Smell_Breeze_And_Light:
-          adjacentCell.pit_probability += 0.2;
-          adjacentCell.wumpus_probability += 0.2;
-          adjacentCell.treasure_probability -= 0.2;
-          adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-          break;
+      if (currentCell.type === CellType.Empty) {
+        adjacentCell.pit_probability = 0.0;
+        adjacentCell.wumpus_probability = 0.0;
+        adjacentCell.treasure_probability = 0.0;
+        adjacentCell.risk_score = 0.0;
       }
+      else if (currentCell.type === CellType.Breeze) {
+        adjacentCell.pit_probability += 0.2;
+        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+      }
+      else if (currentCell.type === CellType.Smell) {
+        adjacentCell.wumpus_probability += 0.3;
+        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+      }
+      else if (currentCell.type === CellType.Light) {
+        adjacentCell.treasure_probability -= 0.3;
+        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+      }
+      else if (currentCell.type === CellType.BreezeAndSmell) {
+        adjacentCell.pit_probability += 0.2;
+        adjacentCell.wumpus_probability += 0.2;
+        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+      }
+      else if (currentCell.type === CellType.BreezeAndLight) {
+        adjacentCell.pit_probability += 0.2;
+        adjacentCell.treasure_probability -= 0.2;
+        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+      }
+      else if (currentCell.type === CellType.SmellAndLight) {
+        adjacentCell.wumpus_probability += 0.2;
+        adjacentCell.treasure_probability -= 0.2;
+        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+      }
+      else if (currentCell.type === CellType.Smell_Breeze_And_Light) {
+        adjacentCell.pit_probability += 0.2;
+        adjacentCell.wumpus_probability += 0.2;
+        adjacentCell.treasure_probability -= 0.2;
+        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
+      }
+
     }
 
+    // else if(!adjacentCell.isHidden){
+    //   adjacentCell.risk_score += 0.075
+    // }
+
     else {
-      adjacentCell.risk_score += 0.05
 
       // switch (currentCellType) {
       //   case CellType.Empty:
+      //     adjacentCell.pit_probability = 0.0;
+      //     adjacentCell.wumpus_probability = 0.0;
+      //     adjacentCell.treasure_probability = 0.0;
+      //     break;
+
       //   case CellType.DeadWumpus:
       //     adjacentCell.wumpus_probability = 0.0;
-      //     adjacentCell.risk_score = 0.0;
       //     break;
+
       // }
+
+      adjacentCell.risk_score += 0.075
     }
 
     const adjacentRow = adjacentCell.position.row;
@@ -174,12 +177,12 @@ export class EvaluateService {
       this.AI.exploredBoard[row][col] = this.generateGame.board[row][col];
       this.generateGame.treasure_left--;
       console.log(this.generateGame.treasure_left)
-      if(this.generateGame.treasure_left===0){
+      if (this.generateGame.treasure_left === 0) {
         this.showMessage("Congratulations! You found all the Treasure.");
         this.isGameOver = true;
         return;
       }
-     
+
     }
 
     else if (this.generateGame.board[row][col].type == CellType.Wumpus) {
@@ -225,7 +228,7 @@ export class EvaluateService {
   }
   gameOver() {
     if (this.AI.player.point <= 0) {
-   //   console.log("mara kha" + this.AI.player.point);
+      //   console.log("mara kha" + this.AI.player.point);
       this.showMessage('Sorry. No moves left. Game Over.');
       this.isGameOver = true;
       this.revealBoard();

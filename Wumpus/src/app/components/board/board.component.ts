@@ -12,59 +12,53 @@ import { HelperService } from 'src/app/services/helper.service';
   styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit {
- 
+
 
   constructor(
     private generateGame: GenerateGameService,
     private AI: AIService,
     private evaluate: EvaluateService,
     private helper: HelperService) { }
-    
+
   board: Cell[][] = [];
   player: Player = new Player();
-  treasure_left: number= this.generateGame.treasure_left;
+  treasure_left: number = this.generateGame.treasure_left;
   buttonsPressed: boolean = false;
   isBoardInteractive: boolean = true;
-// Add these properties to your component class
-isHumanMode: boolean = false;
-private gameInterval: any;
-isGamePaused: boolean=false;
-isPauseButtonVisible : boolean=false;
+  isHumanMode: boolean = false;
+  gameInterval: any;
+  isGamePaused: boolean = false;
+  isPauseButtonVisible: boolean = false;
 
-// Function to start as Human
-startAsHuman() {
-  this.isHumanMode = true;
-  this.isPauseButtonVisible= false;
-  console.log("h");
-  this.buttonsPressed = true;
-  // Add any other logic you need when starting as a Human
-}
+  startAsHuman() {
+    this.isHumanMode = true;
+    this.isPauseButtonVisible = false;
+    this.buttonsPressed = true;
+  }
 
-
-startAsAI() {
-  this.isHumanMode = false;
-  this.isPauseButtonVisible = true;
-  this.playGame();
-  this.isBoardInteractive = false; // Disable board interaction for AI
-  this.buttonsPressed = true;
-  // Add any other logic you need when starting as an AI
-}
+  startAsAI() {
+    this.isHumanMode = false;
+    this.isPauseButtonVisible = true;
+    this.playGame();
+    this.isBoardInteractive = false;
+    this.buttonsPressed = true;
+  }
 
   ngOnInit(): void {
     //  this.player = this.AI.player;
-    this.AI.player.point=100;
-    this.treasure_left=this.generateGame.treasure_left;
+    this.AI.player.point = 100;
+    this.treasure_left = this.generateGame.treasure_left;
     this.initializeBoard();
     this.board = this.generateGame.getBoard();
     this.generateGame.placePitsWumpusTreasure();
-      //get the board
-   // this.playGame(); // not implemented yet
-   // console.log('BoardComponent initialized');
+    //get the board
+    // this.playGame(); // not implemented yet
+    // console.log('BoardComponent initialized');
 
   }
-revealBoard(){
-  this.evaluate.revealBoard();
-}
+  revealBoard() {
+    this.evaluate.revealBoard();
+  }
 
 
   playGame() {
@@ -80,20 +74,62 @@ revealBoard(){
     }, 1000); // Move after every 3 seconds
   }
 
+  //lagtese na ekhon
+  revealCell_AI(rowIndex: number, colIndex: number): void {
+    if (!this.evaluate.isGameOver) {
+      this.generateGame.board[rowIndex][colIndex].isHidden = false;
+
+      this.AI.player.position = { row: rowIndex, col: colIndex };
+      this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
+      this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
+
+      this.evaluate.updateScore(this.player.position.row, this.player.position.col);
+      this.evaluate.updateRisk(rowIndex, colIndex);
+      this.treasure_left = this.generateGame.treasure_left;
+
+      this.board[rowIndex][colIndex] = this.AI.exploredBoard[rowIndex][colIndex];
+      this.generateGame.board[rowIndex][colIndex].risk_score = this.AI.exploredBoard[rowIndex][colIndex].risk_score;
+      this.board = this.AI.exploredBoard;
+      this.player = this.AI.player;
+    }
+  }
+
+  revealCell(rowIndex: number, colIndex: number): void {
+    if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
+
+      // this.generateGame.board[rowIndex][colIndex].isHidden = false;  //eta pore false korsi
+
+      this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
+      this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
+
+
+      this.evaluate.updateScore(rowIndex, colIndex);
+      this.evaluate.updateRisk(rowIndex, colIndex);
+      this.treasure_left = this.generateGame.treasure_left;
+
+      this.generateGame.board[rowIndex][colIndex].isHidden = false;
+
+      this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
+      this.board[rowIndex][colIndex] = this.AI.exploredBoard[rowIndex][colIndex];
+      // this.generateGame.board[rowIndex][colIndex].risk_score = this.AI.exploredBoard[rowIndex][colIndex].risk_score;
+      this.board = this.AI.exploredBoard;
+      this.player = this.AI.player;
+    }
+  }
+
+
   ngOnDestroy(): void {
     clearInterval(this.gameInterval); // Stop the game interval
   }
 
-
   togglePause() {
-    this.isGamePaused = !this.isGamePaused; 
+    this.isGamePaused = !this.isGamePaused;
     if (this.isGamePaused) {
       clearInterval(this.gameInterval);
     } else {
       this.playGame();
     }
   }
-
 
   initializeBoard(): void {
     this.generateGame.board = [];
@@ -107,7 +143,7 @@ revealBoard(){
           hasBreeze: false,
           hasSmell: false,
           hasLight: false,
-         
+
           position: {
             row: row,
             column: col
@@ -124,10 +160,14 @@ revealBoard(){
       this.generateGame.board.push(newRow);
       this.AI.exploredBoard.push(newRow);
     }
+
+    //for the first move
     this.generateGame.board[0][9].isHidden = false;
     this.AI.exploredBoard[0][9] = this.generateGame.board[0][9];
 
     this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
+    this.evaluate.updateScore(this.player.position.row, this.player.position.col);
+    this.evaluate.updateRisk(this.player.position.row, this.player.position.col);
   }
 
   getCellImage(cellType: CellType): string {
@@ -164,50 +204,12 @@ revealBoard(){
     }
   }
 
-  revealCell(rowIndex: number, colIndex: number): void {
-    // console.log(this.getCellTypeString(this.generateGame.board[rowIndex][colIndex].type));
-
-    if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
-      this.generateGame.board[rowIndex][colIndex].isHidden = false;
-
-      this.AI.all_Unvisited_Cells = this.AI.all_Unvisited_Cells.filter((cell) => {
-        return cell.position.row !== rowIndex || cell.position.column !== colIndex;
-      });
-
-      //kon board bujhtesi na
-      this.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
-      this.generateGame.board[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
-      this.AI.exploredBoard[rowIndex][colIndex].risk_score +=0.05; //visited gets less priority
-
-      this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
-
-      this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
-      this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
-
-      
-
-      console.log("Current Risk score: "+this.AI.exploredBoard[rowIndex][colIndex].risk_score);
-
-      this.evaluate.updateScore(rowIndex, colIndex);
-      this.evaluate.updateRisk(rowIndex,colIndex); 
-      this.treasure_left= this.generateGame.treasure_left;
-
-      
-      this.board[rowIndex][colIndex]=this.AI.exploredBoard[rowIndex][colIndex];
-      this.generateGame.board[rowIndex][colIndex].risk_score =this.AI.exploredBoard[rowIndex][colIndex].risk_score;
-      this.board=this.AI.exploredBoard;
-      this.player=this.AI.player;
-    }
-  }
-
   isMoveAvailable(rowIndex: number, colIndex: number): boolean {
     const adjacentCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
     return adjacentCells.some(
       (move) => move.position.row === rowIndex && move.position.column === colIndex
     );
   }
-
-  
 
   AIshootArrow(row: number, col: number) {
     this.AI.shootArrow(row, col);
