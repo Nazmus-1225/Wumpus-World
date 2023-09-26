@@ -31,7 +31,7 @@ export class EvaluateService {
         cell.risk_score = -1;
         setTimeout(() => {
           this.AI.grabTreasure(row, col);
-        }, 500);
+        }, 400);
         break;
 
       case CellType.Wumpus:
@@ -50,12 +50,12 @@ export class EvaluateService {
       case CellType.Light:
         cell.risk_score = -0.1;
         break;
-      case CellType.Smell:
-      case CellType.Breeze:
-      case CellType.BreezeAndSmell:
-        //  case CellType.Smell_Breeze_And_Light:
-        cell.risk_score = 0.1;
-        break;
+      // case CellType.Smell:
+      // case CellType.Breeze:
+      // case CellType.BreezeAndSmell:
+      //   //  case CellType.Smell_Breeze_And_Light:
+      //   cell.risk_score = 0.1;
+      //   break;
 
       case CellType.Empty:
       case CellType.DeadWumpus:
@@ -71,11 +71,14 @@ export class EvaluateService {
 
     }
 
+    cell.total_risk=cell.risk_score+cell.visit_risk;
+
     this.generateGame.board[row][col] = cell
     this.AI.exploredBoard[row][col] = cell;
 
     // const adjacentCells = this.helper.calculateAdjacentCells(row, col); //Cell format
     const adjacentCells = this.AI.availableCells;
+    console.log(cell);
 
     for (const offset of adjacentCells) {
       const adjacentRow = offset.position.row;
@@ -84,16 +87,28 @@ export class EvaluateService {
       const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol]; //position only
 
       //  if (cell.isHidden)
-        this.updateAdjacentRisk(adjacentCell, cell);
+      console.log("Current Before update: " + cell.total_risk);
+      console.log("Adjacent Before update: " + adjacentCell.total_risk);
+      this.updateAdjacentRisk(adjacentCell, cell);
 
+      this.AI.exploredBoard[adjacentRow][adjacentCol]=adjacentCell;
+      this.generateGame.board[adjacentRow][adjacentCol]=adjacentCell;
+
+      this.AI.exploredBoard[row][col]=cell;
+      this.generateGame.board[row][col]=cell;
+
+      console.log("Current After update: " + cell.total_risk);
+      console.log("Adjacent After update: " + adjacentCell.total_risk);
     }
+    // console.log("Current risk score: " + cell.risk_score);
+
   }
 
   updateAdjacentRisk(adjacentCell: Cell, currentCell: Cell) {
 
-    //eta barbar score baray ditese.....
     if (adjacentCell.isHidden && currentCell.isHidden) {
-      console.log("cell: " + adjacentCell.position.row + "," + adjacentCell.position.column)
+      // console.log("cell: " + adjacentCell.position.row + "," + adjacentCell.position.column)
+      console.log("Case 1");
 
       if (currentCell.type === CellType.Empty) {
         adjacentCell.pit_probability = 0.0;
@@ -137,31 +152,54 @@ export class EvaluateService {
 
     }
 
-    // else if(!adjacentCell.isHidden){
-    //   adjacentCell.risk_score += 0.075
-    // }
+    else if (!adjacentCell.isHidden && currentCell.isHidden) {
+      console.log("Case 2");
+      // currentCell.risk_score += 0.075;
+    }
+
+    else if (adjacentCell.isHidden && !currentCell.isHidden) {
+      console.log("Case 3");
+      currentCell.visit_risk += 0.01; // Eta ektu dekha lagbe
+      // currentCell.risk_score += parseFloat(0.075.toFixed(3)); // 3 decimal point
+    }
 
     else {
+      console.log("Case 4");
+      // adjacentCell.risk_score += 0.075;
+      // console.log("Before update - currentCell:", currentCell.risk_score);
+      currentCell.visit_risk += 0.02;
+      // console.log("After update - currentCell:", currentCell.risk_score);
 
-      // switch (currentCellType) {
+      // switch (currentCell.type) {
       //   case CellType.Empty:
       //     adjacentCell.pit_probability = 0.0;
       //     adjacentCell.wumpus_probability = 0.0;
       //     adjacentCell.treasure_probability = 0.0;
+      //     adjacentCell.risk_score -=0.075;
       //     break;
 
       //   case CellType.DeadWumpus:
       //     adjacentCell.wumpus_probability = 0.0;
+      //     adjacentCell.risk_score -=0.075;
       //     break;
 
       // }
 
-      adjacentCell.risk_score += 0.075
+
     }
+
+    adjacentCell.total_risk=adjacentCell.risk_score+adjacentCell.visit_risk;
+    currentCell.total_risk=currentCell.risk_score+currentCell.visit_risk;
 
     const adjacentRow = adjacentCell.position.row;
     const adjacentCol = adjacentCell.position.column;
     this.AI.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
+    this, this.generateGame.board[adjacentRow][adjacentCol] = adjacentCell;
+
+    const currentRow = currentCell.position.row;
+    const currentCol = currentCell.position.column;
+    this.AI.exploredBoard[currentRow][currentCol] = currentCell;
+    this.generateGame.board[currentRow][currentCol] = currentCell;
   }
 
 

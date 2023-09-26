@@ -27,6 +27,8 @@ export interface Cell {
     treasure_probability: number; //keeping it negative
     
     risk_score: number;
+    visit_risk: number;
+    total_risk: number;
 
   }
 

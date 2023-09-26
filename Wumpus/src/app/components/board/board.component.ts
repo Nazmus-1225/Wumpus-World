@@ -71,7 +71,7 @@ export class BoardComponent implements OnInit {
         clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
-    }, 1000); // Move after every 3 seconds
+    }, 500); // Move after every 3 seconds
   }
 
   //lagtese na ekhon
@@ -148,13 +148,20 @@ export class BoardComponent implements OnInit {
             row: row,
             column: col
           },
-          wumpus_probability: 0.01, // 1 out of 100
-          pit_probability: 0.05,  // 5 out of 100
-          treasure_probability: 0.01,  // 1 out of 100
+          wumpus_probability: 0.01,
+          pit_probability: 0.05,
+          treasure_probability: 0.01,
           risk_score: 0
           // + 0.01  // wumpus_probability
           // + 0.05  // pit_probability
           // - 0.01  // treasure_probability
+          ,
+
+
+
+
+          visit_risk: 0,
+          total_risk: 0
         });
       }
       this.generateGame.board.push(newRow);

@@ -43,14 +43,14 @@ export class AIService {
       let lowestRiskCell = this.availableCells[0];
       console.log("Adjacent Risk score: ");
       for (const cell of this.availableCells) {
-        console.log(cell.risk_score);
+        console.log(cell.total_risk);
 
-        if (cell.risk_score < lowestRiskCell.risk_score) {
+        if (cell.total_risk < lowestRiskCell.total_risk) {
           lowestRiskCell = cell;
         }
       }
       console.log("Lowest: "+lowestRiskCell.position.row+" , "+lowestRiskCell.position.column+" , "+lowestRiskCell.isHidden);
-      console.log("lowest risk: "+lowestRiskCell.risk_score);
+      console.log("lowest risk: "+lowestRiskCell.total_risk);
       return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
 
       //------------without path
