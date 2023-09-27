@@ -17,20 +17,42 @@ export class PathFindingService {
     // Dijkstra's algorithm to find the shortest path to all cells
     const shortestPaths = this.dijkstra(start, grid);
   
-    let leastDangerCell: Cell | null = null;
+    let leastDangerCell: Cell | null = {
+      type: CellType.Empty,
+      position: { row: 0, column: 9 },
+      isHidden: true,
+      hasBreeze: false,
+      hasSmell: false,
+      hasLight: false,
+      wumpus_probability: 0.01,
+      pit_probability: 0.05,
+      treasure_probability: -0.01,
+      risk_score: 0,
+      visit_risk: 0,
+      total_risk: 0,
+    };
     let shortestPathLength = Number.MAX_VALUE;
-  
+    targets = targets.filter((target) => !this.areCellsEqual(target, start));
+
     for (const target of targets) {
+   
       const targetPathLength = shortestPaths[target.position.row][target.position.column].distance;
+      console.log("distance "+targetPathLength+" Row "+target.position.column+" Column "+target.position.row)
       if (targetPathLength < shortestPathLength) {
         shortestPathLength = targetPathLength;
         leastDangerCell = target;
       }
     }
-  
+   console.log("ans "+shortestPathLength+" Row "+leastDangerCell.position.column+" Column "+leastDangerCell.position.row)
     return leastDangerCell;
   }
   
+  areCellsEqual(cell1: Cell, cell2: Cell): boolean {
+    return (
+      cell1.position.row === cell2.position.row &&
+      cell1.position.column === cell2.position.column
+    );
+  }
    dijkstra(start: Cell, grid: Cell[][]): { distance: number; previous: Cell | null }[][] {
     const numRows = grid.length;
     const numCols = grid[0].length;
@@ -54,27 +76,85 @@ export class PathFindingService {
       }
     }
   
-    while (unvisitedCells.length > 0) {
-      unvisitedCells.sort(
-        (a, b) => distances[a.position.row][a.position.column].distance - distances[b.position.row][b.position.column].distance
-      );
-      const closestCell = unvisitedCells.shift() as Cell;
+    // while (unvisitedCells.length > 0) {
+    //   unvisitedCells.sort(
+    //     (a, b) => distances[a.position.row][a.position.column].distance - distances[b.position.row][b.position.column].distance
+    //   );
+    //   const closestCell = unvisitedCells.shift() as Cell;
   
-      if (distances[closestCell.position.row][closestCell.position.column].distance === Number.MAX_VALUE) {
-        break;
-      }
+    //   if (distances[closestCell.position.row][closestCell.position.column].distance === Number.MAX_VALUE) {
+    //     break;
+    //   }
   
-      const neighbors = this.helper.calculateAdjacentCells(closestCell.position.row, closestCell.position.column);
-  
-      for (const neighbor of neighbors) {
-        const alt = distances[closestCell.position.row][closestCell.position.column].distance + 1;
-        if (alt < distances[neighbor.position.row][neighbor.position.column].distance) {
-          distances[neighbor.position.row][neighbor.position.column].distance = alt;
-          distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
-        }
-      }
+    //   const neighbors = this.helper.calculateAdjacentCells(closestCell.position.row, closestCell.position.column);
+
+    
+    //   for (const neighbor of neighbors) {
+    //     const alt = distances[closestCell.position.row][closestCell.position.column].distance + closestCell.total_risk;
+    //     // console.log(
+    //     //   " alt "+alt
+    //     //   +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
+    //     //   " visit risk "+closestCell.visit_risk+" rosl score "+ closestCell.risk_score+
+
+    //     //   " risk "+ closestCell.total_risk
+    //     // );
+    //     if (alt <= distances[neighbor.position.row][neighbor.position.column].distance) {
+    //       distances[neighbor.position.row][neighbor.position.column].distance = alt;
+    //       distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
+    //     }
+    //   }
+      
+    // }
+    
+while (unvisitedCells.length > 0) {
+  unvisitedCells.sort(
+    (a, b) => distances[a.position.row][a.position.column].distance + a.total_risk - distances[b.position.row][b.position.column].distance - b.total_risk
+  );
+  const closestCell = unvisitedCells.shift() as Cell;
+
+  if (distances[closestCell.position.row][closestCell.position.column].distance === Number.MAX_VALUE) {
+    // No more accessible cells, break the loop
+    break;
+  }
+
+  const neighbors = this.helper.calculateAdjacentUnvisitedCells(closestCell.position.row, closestCell.position.column);
+
+  for (const neighbor of neighbors) {
+    const alt = distances[closestCell.position.row][closestCell.position.column].distance + closestCell.total_risk;
+// console.log(
+//           " alt "+alt
+//           +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
+//           " visit risk "+closestCell.visit_risk+" rosl score "+ closestCell.risk_score+
+
+//           " risk "+ closestCell.total_risk
+//         );
+    if (alt <= distances[neighbor.position.row][neighbor.position.column].distance) {
+      distances[neighbor.position.row][neighbor.position.column].distance = alt;
+      distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
     }
+  }
+// for (const neighbor of neighbors) {
+//   const isAdjacent = isNeighborAdjacent(closestCell, neighbor);
   
+//   // Calculate alternative distance (alt) based on cumulative risk
+//   const alt = isAdjacent
+//     ? distances[closestCell.position.row][closestCell.position.column].distance
+//     : distances[closestCell.position.row][closestCell.position.column].distance + closestCell.total_risk;
+// // console.log(
+// //           " alt "+alt
+// //           +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
+// //           " visit risk "+closestCell.visit_risk+" rosl score "+ closestCell.risk_score+
+
+// //           " risk "+ closestCell.total_risk
+// //         );
+//   if (alt <= distances[neighbor.position.row][neighbor.position.column].distance) {
+//     distances[neighbor.position.row][neighbor.position.column].distance = alt;
+//     distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
+//   }
+// }
+}
+console.log("ekta done")
+
     return distances;
   }
   
@@ -164,3 +244,15 @@ export class PathFindingService {
 // function calculateHeuristic(x1: number, y1: number, x2: number, y2: number) {
 //     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 // }
+function isNeighborAdjacent(currentCell: Cell, neighborCell: Cell): boolean {
+  const { row: currentRow, column: currentColumn } = currentCell.position;
+  const { row: neighborRow, column: neighborColumn } = neighborCell.position;
+  if(currentCell.position.row===0 && currentCell.position.column ===9){
+console.log("yes");
+  }
+  // Cells are considered adjacent if they share a common edge
+  return (
+    (Math.abs(currentRow - neighborRow) === 1 && currentColumn === neighborColumn) ||
+    (Math.abs(currentColumn - neighborColumn) === 1 && currentRow === neighborRow)
+  );
+}

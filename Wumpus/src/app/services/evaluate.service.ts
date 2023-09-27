@@ -78,7 +78,7 @@ export class EvaluateService {
 
     // const adjacentCells = this.helper.calculateAdjacentCells(row, col); //Cell format
     const adjacentCells = this.AI.availableCells;
-    console.log(cell);
+    //console.log(cell);
 
     for (const offset of adjacentCells) {
       const adjacentRow = offset.position.row;
@@ -86,8 +86,8 @@ export class EvaluateService {
 
       const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol]; //position only
 
-      console.log("Current Before update: " + cell.total_risk);
-      console.log("Adjacent Before update: " + adjacentCell.total_risk);
+      //console.log("Current Before update: " + cell.total_risk);
+      //console.log("Adjacent Before update: " + adjacentCell.total_risk);
       this.updateAdjacentRisk(adjacentCell, cell);
 
       this.AI.exploredBoard[adjacentRow][adjacentCol]=adjacentCell;
@@ -96,8 +96,8 @@ export class EvaluateService {
       this.AI.exploredBoard[row][col]=cell;
       this.generateGame.board[row][col]=cell;
 
-      console.log("Current After update: " + cell.total_risk);
-      console.log("Adjacent After update: " + adjacentCell.total_risk);
+      //console.log("Current After update: " + cell.total_risk);
+    //  console.log("Adjacent After update: " + adjacentCell.total_risk);
     }
 
   }
@@ -107,7 +107,7 @@ export class EvaluateService {
     //checking hidden cell from new position 
     if (adjacentCell.isHidden && currentCell.isHidden) {
       // console.log("cell: " + adjacentCell.position.row + "," + adjacentCell.position.column)
-      console.log("Case 1");
+    //  console.log("Case 1");
 
       if (currentCell.type === CellType.Empty) {
         adjacentCell.pit_probability = 0.0;
@@ -153,20 +153,20 @@ export class EvaluateService {
 
     //checking revealed cell from new position 
     else if (!adjacentCell.isHidden && currentCell.isHidden) {
-      console.log("Case 2");
+     // console.log("Case 2");
       // currentCell.risk_score += 0.075;
     }
 
     //checking hidden cell from visited position  //Is that possible? 
     else if (adjacentCell.isHidden && !currentCell.isHidden) {
-      console.log("Case 3");
+    //  console.log("Case 3");
       currentCell.visit_risk += 0.01; // Eta ektu dekha lagbe
       // currentCell.risk_score += parseFloat(0.075.toFixed(3)); // 3 decimal point
     }
 
     //Already been there.
     else {
-      console.log("Case 4");
+   //   console.log("Case 4");
       currentCell.visit_risk += 0.02;
     }
 
