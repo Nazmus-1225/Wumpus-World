@@ -56,8 +56,8 @@ export class GenerateGameService {
       this.placeRandomElements(CellType.Pit, this.pit_count);
       this.placeRandomElements(CellType.Wumpus, this.wumpus_count);
       this.placeRandomElements(CellType.Treasure, this.treasure_count);
-    } else {
-
+    } 
+    else {
       for (let row = 0; row < 10; row++) {
         for (let col = 0; col < 10; col++) {
           const char = this.parsedBoardData[row][col];
@@ -65,6 +65,7 @@ export class GenerateGameService {
           this.board[row][col].type = cellType;
         }
       }
+      this.calculateBreezeSmellAndLight();
     }
   }
   mapCharacterToCellType(char: string): CellType {
@@ -73,30 +74,36 @@ export class GenerateGameService {
         return CellType.Pit;
       case 'W':
         return CellType.Wumpus;
-      case 'T':
-        return CellType.Treasure;
-      case 'S':
-        return CellType.Smell;
-      case 'B':
-        return CellType.Breeze;
-      case 'L':
-        return CellType.Light;
-      case 'E':
-        return CellType.Empty;
-      case 'A':
-        return CellType.BreezeAndSmell;
-      case 'C':
-        return CellType.BreezeAndLight;
-      case 'D':
-        return CellType.SmellAndLight;
-      case 'E':
-        return CellType.BreezeAndPit;
-      case 'F':
-        return CellType.SmellAndPit;
       case 'G':
-        return CellType.LightAndPit;
-      case 'H':
-        return CellType.Smell_Breeze_And_Light;
+        return CellType.Treasure;
+      case '_':
+        return CellType.Empty;
+
+      // case 'T':
+      //   return CellType.Treasure;
+      // case 'S':
+      //   return CellType.Smell;
+      // case 'B':
+      //   return CellType.Breeze;
+      // case 'L':
+      //   return CellType.Light;
+      // case 'E':
+      //   return CellType.Empty;
+    
+      // case 'A':
+      //   return CellType.BreezeAndSmell;
+      // case 'C':
+      //   return CellType.BreezeAndLight;
+      // case 'D':
+      //   return CellType.SmellAndLight;
+      // case 'F':
+      //   return CellType.SmellAndPit;
+      // case 'H':
+      //   return CellType.LightAndPit;
+      // case 'I':
+      //   return CellType.BreezeAndPit;
+      // case 'J':
+      //   return CellType.Smell_Breeze_And_Light;
       default:
         return CellType.Empty;
     }

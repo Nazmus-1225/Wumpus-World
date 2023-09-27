@@ -74,25 +74,6 @@ export class BoardComponent implements OnInit {
     }, 500); // Move after every 3 seconds
   }
 
-  //lagtese na ekhon
-  revealCell_AI(rowIndex: number, colIndex: number): void {
-    if (!this.evaluate.isGameOver) {
-      this.generateGame.board[rowIndex][colIndex].isHidden = false;
-
-      this.AI.player.position = { row: rowIndex, col: colIndex };
-      this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
-      this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
-
-      this.evaluate.updateScore(this.player.position.row, this.player.position.col);
-      this.evaluate.updateRisk(rowIndex, colIndex);
-      this.treasure_left = this.generateGame.treasure_left;
-
-      this.board[rowIndex][colIndex] = this.AI.exploredBoard[rowIndex][colIndex];
-      this.generateGame.board[rowIndex][colIndex].risk_score = this.AI.exploredBoard[rowIndex][colIndex].risk_score;
-      this.board = this.AI.exploredBoard;
-      this.player = this.AI.player;
-    }
-  }
 
   revealCell(rowIndex: number, colIndex: number): void {
     if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
@@ -105,9 +86,14 @@ export class BoardComponent implements OnInit {
 
       this.evaluate.updateScore(rowIndex, colIndex);
       this.evaluate.updateRisk(rowIndex, colIndex);
+      
       this.treasure_left = this.generateGame.treasure_left;
 
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
+
+      //Updating current visit risk
+      this.generateGame.board[rowIndex][colIndex].visit_risk+=0.075;
+      this.generateGame.board[rowIndex][colIndex].total_risk=this.generateGame.board[rowIndex][colIndex].risk_score+this.generateGame.board[rowIndex][colIndex].visit_risk;
 
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
       this.board[rowIndex][colIndex] = this.AI.exploredBoard[rowIndex][colIndex];

@@ -50,12 +50,12 @@ export class EvaluateService {
       case CellType.Light:
         cell.risk_score = -0.1;
         break;
-      // case CellType.Smell:
-      // case CellType.Breeze:
-      // case CellType.BreezeAndSmell:
-      //   //  case CellType.Smell_Breeze_And_Light:
-      //   cell.risk_score = 0.1;
-      //   break;
+      case CellType.Smell:
+      case CellType.Breeze:
+      case CellType.BreezeAndSmell:
+        //  case CellType.Smell_Breeze_And_Light:
+        cell.risk_score = 0.1;
+        break;
 
       case CellType.Empty:
       case CellType.DeadWumpus:
@@ -86,7 +86,6 @@ export class EvaluateService {
 
       const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol]; //position only
 
-      //  if (cell.isHidden)
       console.log("Current Before update: " + cell.total_risk);
       console.log("Adjacent Before update: " + adjacentCell.total_risk);
       this.updateAdjacentRisk(adjacentCell, cell);
@@ -100,12 +99,12 @@ export class EvaluateService {
       console.log("Current After update: " + cell.total_risk);
       console.log("Adjacent After update: " + adjacentCell.total_risk);
     }
-    // console.log("Current risk score: " + cell.risk_score);
 
   }
 
   updateAdjacentRisk(adjacentCell: Cell, currentCell: Cell) {
 
+    //checking hidden cell from new position 
     if (adjacentCell.isHidden && currentCell.isHidden) {
       // console.log("cell: " + adjacentCell.position.row + "," + adjacentCell.position.column)
       console.log("Case 1");
@@ -152,40 +151,23 @@ export class EvaluateService {
 
     }
 
+    //checking revealed cell from new position 
     else if (!adjacentCell.isHidden && currentCell.isHidden) {
       console.log("Case 2");
       // currentCell.risk_score += 0.075;
     }
 
+    //checking hidden cell from visited position  //Is that possible? 
     else if (adjacentCell.isHidden && !currentCell.isHidden) {
       console.log("Case 3");
       currentCell.visit_risk += 0.01; // Eta ektu dekha lagbe
       // currentCell.risk_score += parseFloat(0.075.toFixed(3)); // 3 decimal point
     }
 
+    //Already been there.
     else {
       console.log("Case 4");
-      // adjacentCell.risk_score += 0.075;
-      // console.log("Before update - currentCell:", currentCell.risk_score);
       currentCell.visit_risk += 0.02;
-      // console.log("After update - currentCell:", currentCell.risk_score);
-
-      // switch (currentCell.type) {
-      //   case CellType.Empty:
-      //     adjacentCell.pit_probability = 0.0;
-      //     adjacentCell.wumpus_probability = 0.0;
-      //     adjacentCell.treasure_probability = 0.0;
-      //     adjacentCell.risk_score -=0.075;
-      //     break;
-
-      //   case CellType.DeadWumpus:
-      //     adjacentCell.wumpus_probability = 0.0;
-      //     adjacentCell.risk_score -=0.075;
-      //     break;
-
-      // }
-
-
     }
 
     adjacentCell.total_risk=adjacentCell.risk_score+adjacentCell.visit_risk;

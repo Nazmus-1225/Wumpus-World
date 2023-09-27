@@ -1,52 +1,38 @@
-.heading {
-    text-align: center;
-    padding: 20px;
-    color: darkslategrey;
-    /* background-color: #333;
-    color: #fff;  */
-  }
-  
+
   .game-title {
     font-family: 'Nunito';
-    font-size: 150px; /* Set the font size to 50px */
-    font-weight: bold; /* Make the text bold if desired */
-    margin: 0; /* Remove default margin */
-    padding: 10px 0; /* Add padding for spacing */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle text shadow for depth */
+    font-size: 150px;
+    font-weight: bold; 
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    -webkit-text-stroke: 3px rgb(238, 237, 237);
   }
   
 
 .main{
-    /* width: 100vw;
-    height: 100vh; */
     display: flex;
     flex-direction: column;
-    /* background-repeat: no-repeat;
-    background-size: contain;*/
-    
+    justify-content: center;
+    align-items: center;
 }
-
-.headPlay{
-    margin: 10%;
-    /* margin-left: 50%; */
-}
-
 
 .heading{
     height: 270px;
     width: auto;
     z-index: 1;
-    /* margin-left: 52%;
-    margin-top: 10%; */
     background-repeat: no-repeat;
     background-size: contain;
-    /* background-image: url("../../../assets/wumpusName.svg"); */
+    margin: 10%;
+    
+    text-align: center;
+    padding: 20px;
+    color: rgb(46, 61, 61);
 }
 
 
 .play {
     display: block;
-    margin-left: 25%;
+    margin-left:40%;
     margin-top: 10%;
     background: #3e5a80;
     border: 0 solid #E2E8F0;
@@ -67,15 +53,4 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
-}
-
-.wumpus{
-    height: 80vh;
-    width: 60vw;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    /* background-image: url("../../../assets/icon.png"); */
-    /* background-repeat: no-repeat; */
-    background-size: contain;
 }
