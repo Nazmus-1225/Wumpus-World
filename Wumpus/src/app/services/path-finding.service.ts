@@ -15,7 +15,8 @@ export class PathFindingService {
     grid: Cell[][]
   ): Cell | null {
     // Dijkstra's algorithm to find the shortest path to all cells
-    const shortestPaths = this.dijkstra(start, grid);
+   
+    const shortestPaths = this.dijkstra(start, grid,targets);
   
     let leastDangerCell: Cell | null = {
       type: CellType.Empty,
@@ -30,10 +31,13 @@ export class PathFindingService {
       risk_score: 0,
       visit_risk: 0,
       total_risk: 0,
+      adjacentCells: this.helper.calculateAdjacentCells(0,9),
+      path_risk:0,
+      visited:false
     };
     let shortestPathLength = Number.MAX_VALUE;
     targets = targets.filter((target) => !this.areCellsEqual(target, start));
-
+    
     for (const target of targets) {
    
       const targetPathLength = shortestPaths[target.position.row][target.position.column].distance;
@@ -53,7 +57,8 @@ export class PathFindingService {
       cell1.position.column === cell2.position.column
     );
   }
-   dijkstra(start: Cell, grid: Cell[][]): { distance: number; previous: Cell | null }[][] {
+
+   dijkstra(start: Cell, grid: Cell[][],targets:Cell[]): { distance: number; previous: Cell | null }[][] {
     const numRows = grid.length;
     const numCols = grid[0].length;
   
@@ -66,7 +71,7 @@ export class PathFindingService {
       }
     }
   
-    distances[start.position.row][start.position.column].distance = 0;
+   distances[start.position.row][start.position.column].distance = 0;
   
     const unvisitedCells: Cell[] = [];
   
@@ -76,36 +81,6 @@ export class PathFindingService {
       }
     }
   
-    // while (unvisitedCells.length > 0) {
-    //   unvisitedCells.sort(
-    //     (a, b) => distances[a.position.row][a.position.column].distance - distances[b.position.row][b.position.column].distance
-    //   );
-    //   const closestCell = unvisitedCells.shift() as Cell;
-  
-    //   if (distances[closestCell.position.row][closestCell.position.column].distance === Number.MAX_VALUE) {
-    //     break;
-    //   }
-  
-    //   const neighbors = this.helper.calculateAdjacentCells(closestCell.position.row, closestCell.position.column);
-
-    
-    //   for (const neighbor of neighbors) {
-    //     const alt = distances[closestCell.position.row][closestCell.position.column].distance + closestCell.total_risk;
-    //     // console.log(
-    //     //   " alt "+alt
-    //     //   +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
-    //     //   " visit risk "+closestCell.visit_risk+" rosl score "+ closestCell.risk_score+
-
-    //     //   " risk "+ closestCell.total_risk
-    //     // );
-    //     if (alt <= distances[neighbor.position.row][neighbor.position.column].distance) {
-    //       distances[neighbor.position.row][neighbor.position.column].distance = alt;
-    //       distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
-    //     }
-    //   }
-      
-    // }
-    
 while (unvisitedCells.length > 0) {
   unvisitedCells.sort(
     (a, b) => distances[a.position.row][a.position.column].distance + a.total_risk - distances[b.position.row][b.position.column].distance - b.total_risk
@@ -116,50 +91,48 @@ while (unvisitedCells.length > 0) {
     // No more accessible cells, break the loop
     break;
   }
-
   const neighbors = this.helper.calculateAdjacentUnvisitedCells(closestCell.position.row, closestCell.position.column);
+//   for (const neighbor of neighbors) {
+//     console.log(`Row: ${closestCell.position.row}, Column: ${closestCell.position.column}`)
+//     console.log(`Row: ${neighbor.position.row}, Column: ${neighbor.position.column}`);
+// }
+  closestCell.adjacentCells=this.helper.calculateAdjacentCells(closestCell.position.row,closestCell.position.column)
+  if(!closestCell.isHidden){
+  for (const neighbor of closestCell.adjacentCells ) {
+    console.log(closestCell.position.row+" "+closestCell.position.column)
+   console.log(neighbor.position.row+" "+neighbor.position.column)  
+   console.log( distances[closestCell.position.row][closestCell.position.column].distance)
+   console.log( "before "+distances[neighbor.position.row][neighbor.position.column].distance) 
 
-  for (const neighbor of neighbors) {
-    const alt = distances[closestCell.position.row][closestCell.position.column].distance + closestCell.total_risk;
-// console.log(
-//           " alt "+alt
-//           +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
-//           " visit risk "+closestCell.visit_risk+" rosl score "+ closestCell.risk_score+
-
-//           " risk "+ closestCell.total_risk
-//         );
+    const alt = distances[closestCell.position.row][closestCell.position.column].distance +neighbor.total_risk+closestCell.total_risk;
+    // console.log(
+    //       " alt "+alt
+    //       +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
+    //       " risk "+ closestCell.total_risk
+    //     );
     if (alt <= distances[neighbor.position.row][neighbor.position.column].distance) {
       distances[neighbor.position.row][neighbor.position.column].distance = alt;
       distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
     }
+    console.log("After "+ distances[neighbor.position.row][neighbor.position.column].distance) 
   }
-// for (const neighbor of neighbors) {
-//   const isAdjacent = isNeighborAdjacent(closestCell, neighbor);
-  
-//   // Calculate alternative distance (alt) based on cumulative risk
-//   const alt = isAdjacent
-//     ? distances[closestCell.position.row][closestCell.position.column].distance
-//     : distances[closestCell.position.row][closestCell.position.column].distance + closestCell.total_risk;
-// // console.log(
-// //           " alt "+alt
-// //           +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
-// //           " visit risk "+closestCell.visit_risk+" rosl score "+ closestCell.risk_score+
-
-// //           " risk "+ closestCell.total_risk
-// //         );
-//   if (alt <= distances[neighbor.position.row][neighbor.position.column].distance) {
-//     distances[neighbor.position.row][neighbor.position.column].distance = alt;
-//     distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
-//   }
-// }
 }
-console.log("ekta done")
+  console.log("ekta done")
+
+}
 
     return distances;
+  }}
+
+  function isNeighborAdjacent(currentCell: Cell, neighborCell: Cell): boolean {
+    const { row: currentRow, column: currentColumn } = currentCell.position;
+    const { row: neighborRow, column: neighborColumn } = neighborCell.position;
+    // Cells are considered adjacent if they share a common edge
+    return (
+      (Math.abs(currentRow - neighborRow) === 1 && currentColumn === neighborColumn) ||
+      (Math.abs(currentColumn - neighborColumn) === 1 && currentRow === neighborRow)
+    );
   }
-  
-  
-}
 
 
 //Mubin
@@ -244,15 +217,4 @@ console.log("ekta done")
 // function calculateHeuristic(x1: number, y1: number, x2: number, y2: number) {
 //     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 // }
-function isNeighborAdjacent(currentCell: Cell, neighborCell: Cell): boolean {
-  const { row: currentRow, column: currentColumn } = currentCell.position;
-  const { row: neighborRow, column: neighborColumn } = neighborCell.position;
-  if(currentCell.position.row===0 && currentCell.position.column ===9){
-console.log("yes");
-  }
-  // Cells are considered adjacent if they share a common edge
-  return (
-    (Math.abs(currentRow - neighborRow) === 1 && currentColumn === neighborColumn) ||
-    (Math.abs(currentColumn - neighborColumn) === 1 && currentRow === neighborRow)
-  );
-}
+

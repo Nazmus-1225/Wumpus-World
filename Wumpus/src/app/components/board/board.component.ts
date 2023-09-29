@@ -67,15 +67,16 @@ export class BoardComponent implements OnInit {
         this.evaluate.gameOver();
         const { row, column } = this.AI.makeAIMove();
         this.revealCell(row, column);
+        
       } else {
         clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
-    }, 500); // Move after every 3 seconds
+    }, 1000); // Move after every 3 seconds
   }
 
-
   revealCell(rowIndex: number, colIndex: number): void {
+    
     if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
 
       // this.generateGame.board[rowIndex][colIndex].isHidden = false;  //eta pore false korsi
@@ -142,12 +143,11 @@ export class BoardComponent implements OnInit {
           // + 0.05  // pit_probability
           // - 0.01  // treasure_probability
           ,
-
-
-
-
           visit_risk: 0,
-          total_risk: 0
+          total_risk: 0,
+          adjacentCells: this.helper.calculateAdjacentCells(row, col),
+        path_risk:0,
+        visited:false
         });
       }
       this.generateGame.board.push(newRow);

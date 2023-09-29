@@ -39,39 +39,46 @@ export class AIService {
 
       // this.evaluate.updateRisk(this.player.position.row, this.player.position.col); 
 
-      //without path
-      let lowestRiskCell = this.availableCells[0];
-      console.log("Adjacent Risk score: ");
-      for (const cell of this.availableCells) {
-        console.log(cell.total_risk);
+//       //without path
+//       let lowestRiskCell = this.availableCells[0];
+//    //   console.log("Adjacent Risk score: ");
+//       for (const cell of this.availableCells) {
+//       //  console.log(cell.total_risk);
 
-        if (cell.total_risk < lowestRiskCell.total_risk) {
-          lowestRiskCell = cell;
-        }
-      }
-      console.log("Lowest: "+lowestRiskCell.position.row+" , "+lowestRiskCell.position.column+" , "+lowestRiskCell.isHidden);
-      console.log("lowest risk: "+lowestRiskCell.total_risk);
-      return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
+//         if (cell.total_risk < lowestRiskCell.total_risk) {
+//           lowestRiskCell = cell;
+//         }
+//       }
+//    //   console.log("Lowest: "+lowestRiskCell.position.row+" , "+lowestRiskCell.position.column+" , "+lowestRiskCell.isHidden);
+//    //   console.log("lowest risk: "+lowestRiskCell.total_risk);
+//    lowestRiskCell.adjacentCells=this.helper.calculateAdjacentCells(lowestRiskCell.position.row,lowestRiskCell.position.column)
+// //    console.log("Adjacent cells for row " + lowestRiskCell.position.column + ", column " + lowestRiskCell.position.row + ":");
+// //   lowestRiskCell.adjacentCells.forEach((adjacentCell) => {
+// //     console.log("Row: " + adjacentCell.position.column + ", Column: " + adjacentCell.position.row);
+// // });
+
+
+//       return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
 
       //------------without path
 
 
       //with path
-      // const newAdjacentUnvisitedCells = this.helper.calculateAdjacentUnvisitedCells(this.player.position.row, this.player.position.col);
-      // this.all_Unvisited_Cells.push(...newAdjacentUnvisitedCells);
+      const newAdjacentUnvisitedCells = this.helper.calculateAdjacentUnvisitedCells(this.player.position.row, this.player.position.col);
+      this.all_Unvisited_Cells.push(this.exploredBoard[0][9]);
+      this.all_Unvisited_Cells.push(...newAdjacentUnvisitedCells);
 
-      // console.log(newAdjacentUnvisitedCells);
 
-      // const currentCell = this.generateGame.board[this.player.position.row][this.player.position.col];
+      const currentCell = this.generateGame.board[this.player.position.row][this.player.position.col];
 
-      // let lowestRiskCell = this.path.findCellWithLeastDanger(currentCell, this.all_Unvisited_Cells, this.generateGame.board);
+      let lowestRiskCell = this.path.findCellWithLeastDanger(currentCell, this.all_Unvisited_Cells, this.generateGame.board);
 
-      // if (lowestRiskCell != null) {
-      //   console.log("row: " + lowestRiskCell.position.row + " column: " + lowestRiskCell.position.column);
-      //   return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
-      // }
-      // else
-      //   return { row: -1, column: -1 }
+      if (lowestRiskCell != null) {
+        console.log("row: " + lowestRiskCell.position.row + " column: " + lowestRiskCell.position.column);
+        return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
+      }
+      else
+        return { row: -1, column: -1 }
 
       //----------------with path
 
