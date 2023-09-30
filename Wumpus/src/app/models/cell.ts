@@ -30,8 +30,10 @@ export interface Cell {
     visit_risk: number;
     total_risk: number;
     adjacentCells: Cell[];
-    f_score?: number; 
-    g_score?: number;
+    f_score: number; 
+    g_score: number;
+    path_risk: number;
+    path?: Cell;
 
   }
 

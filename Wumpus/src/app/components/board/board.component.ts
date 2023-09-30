@@ -72,7 +72,7 @@ export class BoardComponent implements OnInit {
         clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
-    }, 500); // Move after every 3 seconds
+    }, 3000); // Move after every 3 seconds
   }
 
   revealCell(rowIndex: number, colIndex: number): void {
@@ -145,7 +145,10 @@ export class BoardComponent implements OnInit {
           ,
           visit_risk: 0,
           total_risk: 0,
-          adjacentCells: this.helper.calculateAdjacentCells(row, col)
+          adjacentCells: this.helper.calculateAdjacentCells(row, col),
+          path_risk:0,
+          g_score:0,
+          f_score:0,
         });
       }
       this.generateGame.board.push(newRow);

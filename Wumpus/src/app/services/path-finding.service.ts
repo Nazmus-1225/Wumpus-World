@@ -4,124 +4,123 @@ import { HelperService } from './helper.service';
 import { Path } from '../models/path';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PathFindingService {
-  constructor(private helper: HelperService) {
+  constructor(private helper: HelperService) {}
+
+  areCellsEqual(cell1: Cell | null, cell2: Cell | null): boolean {
+    if (cell1 != null && cell2 != null) {
+      return (
+        cell1.position.row === cell2.position.row &&
+        cell1.position.column === cell2.position.column
+      );
+    } else {
+      return false;
+    }
   }
 
-  findCellWithLeastDanger(
-        start: Cell,
-        targets: Cell[],
-        grid: Cell[][]
-      ): Cell | null {
-       
-       
-const shortestPaths = this.findShortestPaths(start, targets);
-// for (const cell of shortestPaths.keys()) {
-//     const distance = shortestPaths.get(cell);
-//     console.log(`Cell: ${cell.position.column}, ${cell.position.row}`);
-//     console.log(`Distance: ${distance}`);
-//     console.log(`f_score: ${cell.f_score || 0}`);
-//     console.log(`g_score: ${cell.g_score || 0}`);
-//     console.log(`Visited: ${cell.visited}`);
-//     // Add more properties as needed
-//     console.log('---');
-// }
-targets = targets.filter((target) => !this.areCellsEqual(target, start))
-        let leastDangerCell: Cell | null = {
-          type: CellType.Empty,
-          position: { row: 0, column: 9 },
-          isHidden: true,
-          hasBreeze: false,
-          hasSmell: false,
-          hasLight: false,
-          wumpus_probability: 0.01,
-          pit_probability: 0.05,
-          treasure_probability: -0.01,
-          risk_score: 0,
-          visit_risk: 0,
-          total_risk: 0,
-          adjacentCells: this.helper.calculateAdjacentCells(0,9),
-       
-        };
-        let shortestPathLength = Number.MAX_VALUE;
-        
-        for (const target of targets) {
-       
-        const targetPathLength = shortestPaths.get(target);
-      console.log("distance "+targetPathLength+" Row "+target.position.column+" Column "+target.position.row)
-       if (targetPathLength !== undefined && targetPathLength < shortestPathLength) {
-        shortestPathLength = targetPathLength;
-        leastDangerCell = target;
-      }
-        }
-       console.log("ans "+shortestPathLength+" Row "+leastDangerCell.position.column+" Column "+leastDangerCell.position.row)
-        return leastDangerCell;
-      }
-
-      
   calculateHeuristic(current: Cell, target: Cell): number {
-    return Math.abs(current.position.row - target.position.row) + Math.abs(current.position.column - target.position.column);
-}
-findShortestPaths(
-  start: Cell,
-   targets: Cell[]
-): Map<Cell, number> {
-  const openList: Cell[] = [];
-  const closedList = new Map<Cell, boolean>();
-  const gScores = new Map<Cell, number>();
-  const fScores = new Map<Cell, number>();
-
-  gScores.set(start, 0);
-  fScores.set(start, this.calculateHeuristic(start, start));
-
-  openList.push(start);
-
-  while (openList.length > 0) {
-      // Find the cell with the lowest f-score in the open list
-      openList.sort((a, b) => (fScores.get(a) || 0) - (fScores.get(b) || 0));
-
-      const current = openList.shift();
-
-      if (!current) break;
-
-      closedList.set(current, true);
-current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, current.position.column)
-      for (const neighbor of current.adjacentCells) {
-          if (closedList.has(neighbor)) continue;
-          const tentativeGScore = (gScores.get(current) || 0) +neighbor.total_risk+current.total_risk+1; // Assuming a cost of 1 to move between adjacent cells
-
-          if (!openList.includes(neighbor)) {
-              openList.push(neighbor);
-          } else if (tentativeGScore >= (gScores.get(neighbor) || 0)) {
-              continue; // This is not a better path
-          }
-
-          // This path is the best one so far. Record it!
-          gScores.set(neighbor, tentativeGScore);
-          fScores.set(neighbor, tentativeGScore + this.calculateHeuristic(neighbor, start));
-      }
-  }
-
-  // Extract the distances (g-scores) to all cells from the start cell
-  const distances = new Map<Cell, number>();
-  for (const cell of closedList.keys()) {
-      distances.set(cell, gScores.get(cell) || 0);
-  }
-
-  return distances;
-}
-
-  areCellsEqual(cell1: Cell, cell2: Cell): boolean {
     return (
-      cell1.position.row === cell2.position.row &&
-      cell1.position.column === cell2.position.column
+      Math.abs(current.position.row - target.position.row) +
+      Math.abs(current.position.column - target.position.column)
     );
   }
+  findCellWithLeastDanger(start: Cell, targets: Cell[]): Cell | null {
+    // Calculate shortest distances and paths
+    const distancesAndPaths = this.findShortestPaths(start);
+  
+    // Filter out the start cell from the targets
+    targets = targets.filter((target) => !this.areCellsEqual(target, start));
+  
+    let leastDangerCell: Cell | null = null;
+    let shortestPathLength = Number.MAX_VALUE;
+  
+    for (const target of targets) {
+      // Get the distance and path for the current target
+      const { distance, path } = distancesAndPaths.get(target) || { distance: undefined, path: [] };
+      console.log(`Distance to Target: ${distance}` +" row "+ target.position.column+" column "+target.position.row);
+      console.log('Path to Target:', path.map(cell => cell.position));
+      if (distance !== undefined && distance < shortestPathLength) {
+        shortestPathLength = distance;
+        leastDangerCell = target;       
+      }
+    }
+  
+    if (leastDangerCell !== null) {
+      console.log(
+        'Answer - Row ' +
+          leastDangerCell.position.column +
+          ' Column ' +
+          leastDangerCell.position.row
+      );
+    }
+  
+    return leastDangerCell;
+  }
+  
+  findShortestPaths(start: Cell): Map<Cell, { distance: number; path: Cell[] }> {
+    const openList: Cell[] = [];
+    const closedList = new Map<Cell, boolean>();
+    const gScores = new Map<Cell, number>();
+    const fScores = new Map<Cell, number>();
+    const paths = new Map<Cell, Cell[]>(); // Map to store paths
+  
+    gScores.set(start, 0);
+    fScores.set(start, this.calculateHeuristic(start, start));
+    paths.set(start, [start]); // Initialize the path with the start cell
+  
+    openList.push(start);
+  
+    while (openList.length > 0) {
+      openList.sort((a, b) => (fScores.get(a) || 0) - (fScores.get(b) || 0));
+  
+      const current = openList.shift();
+  
+      if (!current) break;
+  
+      closedList.set(current, true);
+      current.adjacentCells = this.helper.calculateAdjacentCells(
+        current.position.row,
+        current.position.column
+      );
+  
+      for (const neighbor of current.adjacentCells) {
+        if (closedList.has(neighbor)) continue;
+  
+        neighbor.path_risk += current.visit_risk;
+        const tentativeGScore = (gScores.get(current) || 0) + 1;
+  
+        if (!openList.includes(neighbor)) {
+          openList.push(neighbor);
+        } else if (tentativeGScore >= (gScores.get(neighbor) || 0)) {
+          continue;
+        }
+  
+        gScores.set(neighbor, tentativeGScore);
+        fScores.set(
+          neighbor,
+          tentativeGScore + this.calculateHeuristic(neighbor, start)
+        );
+  
+        // Update the path to the neighbor
+        paths.set(neighbor, [...paths.get(current)!, neighbor]);
+      }
+    }
+  
+    // Extract the distances and paths to all cells from the start cell
+    const distancesAndPaths = new Map<Cell, { distance: number; path: Cell[] }>();
+    for (const cell of closedList.keys()) {
+      distancesAndPaths.set(cell, {
+        distance: gScores.get(cell) || 0,
+        path: paths.get(cell) || [],
+      });
+    }
+  
+    return distancesAndPaths;
+  }
+  
 }
-
-
 //mubins a* in ts
 // function calculateHeuristic(x1: number, y1: number, x2: number, y2: number): number {
 // return Math.abs(x1 - x2) + Math.abs(y1 - y2);
@@ -207,11 +206,9 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 // }
 
 // function isCellVisited(x: number, y: number): boolean {
-   
+
 //     return false; // Replace with your implementation
 // }
-
-
 
 // dijkstra :3
 //   findCellWithLeastDanger(
@@ -220,9 +217,9 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 //     grid: Cell[][]
 //   ): Cell | null {
 //     // Dijkstra's algorithm to find the shortest path to all cells
-   
+
 //     const shortestPaths = this.dijkstra(start, grid,targets);
-  
+
 //     let leastDangerCell: Cell | null = {
 //       type: CellType.Empty,
 //       position: { row: 0, column: 9 },
@@ -242,9 +239,9 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 //     };
 //     let shortestPathLength = Number.MAX_VALUE;
 //     targets = targets.filter((target) => !this.areCellsEqual(target, start));
-    
+
 //     for (const target of targets) {
-   
+
 //       const targetPathLength = shortestPaths[target.position.row][target.position.column].distance;
 //       console.log("distance "+targetPathLength+" Row "+target.position.column+" Column "+target.position.row)
 //       if (targetPathLength < shortestPathLength) {
@@ -255,7 +252,7 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 //    console.log("ans "+shortestPathLength+" Row "+leastDangerCell.position.column+" Column "+leastDangerCell.position.row)
 //     return leastDangerCell;
 //   }
-  
+
 //   areCellsEqual(cell1: Cell, cell2: Cell): boolean {
 //     return (
 //       cell1.position.row === cell2.position.row &&
@@ -266,26 +263,26 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 //    dijkstra(start: Cell, grid: Cell[][],targets:Cell[]): { distance: number; previous: Cell | null }[][] {
 //     const numRows = grid.length;
 //     const numCols = grid[0].length;
-  
+
 //     const distances: { distance: number; previous: Cell | null }[][] = [];
-  
+
 //     for (let row = 0; row < numRows; row++) {
 //       distances[row] = [];
 //       for (let col = 0; col < numCols; col++) {
 //         distances[row][col] = { distance: Number.MAX_VALUE, previous: null };
 //       }
 //     }
-  
+
 //    distances[start.position.row][start.position.column].distance = 0;
-  
+
 //     const unvisitedCells: Cell[] = [];
-  
+
 //     for (let row = 0; row < numRows; row++) {
 //       for (let col = 0; col < numCols; col++) {
 //         unvisitedCells.push(grid[row][col]);
 //       }
 //     }
-  
+
 // while (unvisitedCells.length > 0) {
 //   unvisitedCells.sort(
 //     (a, b) => distances[a.position.row][a.position.column].distance + a.total_risk - distances[b.position.row][b.position.column].distance - b.total_risk
@@ -305,21 +302,21 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 //   if(!closestCell.isHidden){
 //   for (const neighbor of closestCell.adjacentCells ) {
 //     console.log(closestCell.position.row+" "+closestCell.position.column)
-//    console.log(neighbor.position.row+" "+neighbor.position.column)  
+//    console.log(neighbor.position.row+" "+neighbor.position.column)
 //    console.log( distances[closestCell.position.row][closestCell.position.column].distance)
-//    console.log( "before "+distances[neighbor.position.row][neighbor.position.column].distance) 
+//    console.log( "before "+distances[neighbor.position.row][neighbor.position.column].distance)
 
 //     const alt = distances[closestCell.position.row][closestCell.position.column].distance +neighbor.total_risk+closestCell.total_risk;
 //     // console.log(
 //     //       " alt "+alt
-//     //       +" row "+closestCell.position.column+" col "+closestCell.position.row+ 
+//     //       +" row "+closestCell.position.column+" col "+closestCell.position.row+
 //     //       " risk "+ closestCell.total_risk
 //     //     );
 //     if (alt <= distances[neighbor.position.row][neighbor.position.column].distance) {
 //       distances[neighbor.position.row][neighbor.position.column].distance = alt;
 //       distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
 //     }
-//     console.log("After "+ distances[neighbor.position.row][neighbor.position.column].distance) 
+//     console.log("After "+ distances[neighbor.position.row][neighbor.position.column].distance)
 //   }
 // }
 //   console.log("ekta done")
@@ -338,7 +335,6 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 //       (Math.abs(currentColumn - neighborColumn) === 1 && currentRow === neighborRow)
 //     );
 //   }
-
 
 //Mubin
 // function findPath(startX: number, startY: number, targetX: number, targetY: number) {
@@ -423,3 +419,64 @@ current.adjacentCells=this.helper.calculateAdjacentCells(current.position.row, c
 //     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 // }
 
+  // findCellWithLeastDanger(start: Cell, targets: Cell[]): Cell | null {
+  //   const shortestPaths = this.findShortestPaths(start);
+  //   // for (const cell of shortestPaths.keys()) {
+  //   //     const distance = shortestPaths.get(cell);
+  //   //     console.log(`Cell: ${cell.position.column}, ${cell.position.row}`);
+  //   //     console.log(`Distance: ${distance}`);
+  //   //     console.log(`f_score: ${cell.f_score || 0}`);
+  //   //     console.log(`g_score: ${cell.g_score || 0}`);
+  //   //     console.log(`Visited: ${cell.visited}`);
+  //   //     // Add more properties as needed
+  //   //     console.log('---');
+  //   // }
+  //   targets = targets.filter((target) => !this.areCellsEqual(target, start));
+  //   let leastDangerCell: Cell | null = {
+  //     type: CellType.Empty,
+  //     position: { row: 0, column: 9 },
+  //     isHidden: true,
+  //     hasBreeze: false,
+  //     hasSmell: false,
+  //     hasLight: false,
+  //     wumpus_probability: 0.01,
+  //     pit_probability: 0.05,
+  //     treasure_probability: -0.01,
+  //     risk_score: 0,
+  //     visit_risk: 0,
+  //     total_risk: 0,
+  //     adjacentCells: this.helper.calculateAdjacentCells(0, 9),
+  //     path_risk: 0,
+  //     g_score: 0,
+  //     f_score: 0,
+  //   };
+  //   let shortestPathLength = Number.MAX_VALUE;
+
+  //   for (const target of targets) {
+  //     const targetPathLength = shortestPaths.get(target);
+  //     console.log(
+  //       'distance ' +
+  //         targetPathLength +
+  //         ' Row ' +
+  //         target.position.column +
+  //         ' Column ' +
+  //         target.position.row
+  //     );
+  //     if (
+  //       targetPathLength !== undefined &&
+  //       targetPathLength < shortestPathLength 
+  //     ) {
+  //       shortestPathLength = targetPathLength;
+  //       leastDangerCell = target;
+  //     }
+  //   }
+  //   console.log(
+  //     'ans ' +
+  //       shortestPathLength +
+  //       ' Row ' +
+  //       leastDangerCell.position.column +
+  //       ' Column ' +
+  //       leastDangerCell.position.row
+  //   );
+  //   return leastDangerCell;
+  // }
