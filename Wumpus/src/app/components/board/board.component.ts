@@ -5,7 +5,6 @@ import { GenerateGameService } from 'src/app/services/generate-game.service';
 import { AIService } from 'src/app/services/ai.service';
 import { EvaluateService } from 'src/app/services/evaluate.service';
 import { HelperService } from 'src/app/services/helper.service';
-
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
@@ -72,7 +71,7 @@ export class BoardComponent implements OnInit {
         clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
-    }, 3000); // Move after every 3 seconds
+    }, 300); // Move after every 3 seconds
   }
 
   revealCell(rowIndex: number, colIndex: number): void {
@@ -151,6 +150,7 @@ export class BoardComponent implements OnInit {
           f_score:0,
         });
       }
+
       this.generateGame.board.push(newRow);
       this.AI.exploredBoard.push(newRow);
     }

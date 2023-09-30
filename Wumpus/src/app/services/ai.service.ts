@@ -4,7 +4,8 @@ import { Player } from '../models/player.model';
 import { Cell, CellType } from '../models/cell';
 import { HelperService } from './helper.service';
 import { PathFindingService } from './path-finding.service';
-import { EvaluateService } from './evaluate.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MessageModalComponent } from '../components/message-modal/message-modal.component';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class AIService {
   constructor(
     private generateGame: GenerateGameService,
     private helper: HelperService,
-    private path: PathFindingService
+    private path: PathFindingService,
+    private dialog: MatDialog
   ) { }
 
   randomRow: number = 0;
@@ -74,7 +76,6 @@ export class AIService {
     }
   }
 
-
   shootArrow(row: number, col: number) {
     if (this.player.hasArrow) {
       this.player.hasArrow = false;
@@ -83,7 +84,7 @@ export class AIService {
       this.exploredBoard[row][col] = this.generateGame.board[row][col];
 
       if (this.generateGame.board[row][col].type === CellType.Wumpus) {
-        alert("You killed the wumpus!");
+        this.showMessage("You killed the wumpus!");
         this.generateGame.board[row][col].type = CellType.DeadWumpus;
 
         //remove smell from adjacents
@@ -98,12 +99,12 @@ export class AIService {
         }
       }
       else {
-        alert("There wasn't any wumpus here.");
+        this.showMessage("There wasn't any wumpus here.");
       }
     }
 
     else {
-      alert('You have no arrow left')
+      this.showMessage('You have no arrow left')
     }
 
   }
@@ -111,7 +112,7 @@ export class AIService {
   grabTreasure(row: number, col: number) {
     if (this.generateGame.board[row][col].type === CellType.Treasure) {
       this.generateGame.board[row][col].isHidden = false;
-      alert("You got a treasure!");
+      this.showMessage("You got a treasure!");
       this.generateGame.board[row][col].type = CellType.Empty;
       //remove light from adjacents
       const adjacentCells = this.helper.calculateAdjacentCells(row, col);
@@ -140,7 +141,15 @@ export class AIService {
     }
 
   }
-
+  showMessage(message: string): void {
+    const dialogRef = this.dialog.open(MessageModalComponent, {
+      width: '300px',
+      data: { message }
+    })
+    dialogRef.afterClosed().subscribe(() => {
+    });
+    dialogRef.disableClose = true;
+  }
 
 }
 

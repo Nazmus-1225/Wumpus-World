@@ -6,15 +6,13 @@ import { BoardComponent } from './components/board/board.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { StartComponent } from './components/start/start.component';
 import { SettingsComponent } from './components/settings/settings.component';
-import { ModalComponent } from './components/modal/modal.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     BoardComponent,
     StartComponent,
-    SettingsComponent,
-    ModalComponent
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
