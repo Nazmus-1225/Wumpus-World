@@ -36,7 +36,6 @@ export class AIService {
           return { row: -1, column: -1 };
         }
       }
-
       // this.evaluate.updateRisk(this.player.position.row, this.player.position.col); 
 
 //       //without path
@@ -57,7 +56,7 @@ export class AIService {
 // //     console.log("Row: " + adjacentCell.position.column + ", Column: " + adjacentCell.position.row);
 // // });
 
-
+// console.log("done done")
 //       return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
 
       //------------without path
@@ -68,13 +67,10 @@ export class AIService {
       this.all_Unvisited_Cells.push(this.exploredBoard[0][9]);
       this.all_Unvisited_Cells.push(...newAdjacentUnvisitedCells);
 
-
       const currentCell = this.generateGame.board[this.player.position.row][this.player.position.col];
-
       let lowestRiskCell = this.path.findCellWithLeastDanger(currentCell, this.all_Unvisited_Cells, this.generateGame.board);
-
       if (lowestRiskCell != null) {
-        console.log("row: " + lowestRiskCell.position.row + " column: " + lowestRiskCell.position.column);
+      //  console.log("row: " + lowestRiskCell.position.row + " column: " + lowestRiskCell.position.column);
         return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
       }
       else
