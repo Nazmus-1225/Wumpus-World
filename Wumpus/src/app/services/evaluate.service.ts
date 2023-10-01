@@ -42,14 +42,12 @@ export class EvaluateService {
       case CellType.Pit:
       case CellType.BreezeAndPit:
       case CellType.SmellAndPit:
-      case CellType.LightAndPit:
+      
         cell.pit_probability = 1;
         cell.risk_score = 1;
         break;
 
-      case CellType.Light:
-        cell.risk_score = -0.1;
-        break;
+      
 
       case CellType.Smell:
       case CellType.Breeze:
@@ -107,31 +105,13 @@ export class EvaluateService {
         adjacentCell.wumpus_probability += 0.3;
         adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
       }
-      else if (currentCell.type === CellType.Light) {
-        adjacentCell.treasure_probability -= 0.3;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-      }
+      
       else if (currentCell.type === CellType.BreezeAndSmell) {
         adjacentCell.pit_probability += 0.2;
         adjacentCell.wumpus_probability += 0.2;
         adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
       }
-      else if (currentCell.type === CellType.BreezeAndLight) {
-        adjacentCell.pit_probability += 0.2;
-        adjacentCell.treasure_probability -= 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-      }
-      else if (currentCell.type === CellType.SmellAndLight) {
-        adjacentCell.wumpus_probability += 0.2;
-        adjacentCell.treasure_probability -= 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-      }
-      else if (currentCell.type === CellType.Smell_Breeze_And_Light) {
-        adjacentCell.pit_probability += 0.2;
-        adjacentCell.wumpus_probability += 0.2;
-        adjacentCell.treasure_probability -= 0.2;
-        adjacentCell.risk_score = adjacentCell.risk_score + adjacentCell.pit_probability + adjacentCell.wumpus_probability + adjacentCell.treasure_probability;
-      }
+     
 
     }
 
@@ -194,7 +174,7 @@ export class EvaluateService {
     else if (this.generateGame.board[row][col].type == CellType.Pit
       || this.generateGame.board[row][col].type == CellType.BreezeAndPit
       || this.generateGame.board[row][col].type == CellType.SmellAndPit
-      || this.generateGame.board[row][col].type == CellType.LightAndPit) {
+      ) {
       this.AI.player.point -= 1000;
       this.helper.playAudio("./assets/audio/pit.wav");
       this.showMessage("Oops! You fell on a pit. Game over")

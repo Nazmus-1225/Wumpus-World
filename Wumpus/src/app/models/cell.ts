@@ -6,14 +6,9 @@ export enum CellType {
     Treasure,
     Breeze,
     Smell,
-    Light,
     BreezeAndSmell,
-    BreezeAndLight,
-    SmellAndLight,
     BreezeAndPit,
     SmellAndPit,
-    LightAndPit,
-    Smell_Breeze_And_Light
   }
 export interface Cell {
     type: CellType;
@@ -21,11 +16,9 @@ export interface Cell {
     isHidden: boolean;
     hasBreeze: boolean;
     hasSmell: boolean;
-    hasLight: boolean;
     wumpus_probability: number;
     pit_probability: number;
-    treasure_probability: number; //keeping it negative
-    
+    treasure_probability: number; //keeping it negative 
     risk_score: number;
     visit_risk: number;
     total_risk: number;
