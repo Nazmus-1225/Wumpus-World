@@ -1,10 +1,16 @@
 .board {
   display: grid;
-  grid-template-columns: repeat(10, 70px);
-  grid-template-rows: repeat(10, 70px);
+  grid-template-columns: repeat(10, 60px);
+  grid-template-rows: repeat(10, 60px);
   grid-gap: 2px;
 }
+.board-container {
+  display: flex;
+}
 
+.board {
+  margin-right: 50px; 
+}
 .game-container {
   display: flex;
   justify-content: center;
@@ -62,7 +68,7 @@
   align-items: center;
   background-color: #f2f2f2;
   padding: 20px;
-  margin: 40px;
+  margin: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;

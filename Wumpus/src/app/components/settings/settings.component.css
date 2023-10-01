@@ -52,9 +52,16 @@
   align-items: center;
 }
 
-#start {
-  font-size: 18px;
+/* #start {
+  font-size: 20px;
   font-weight: bold;
+} */
+.start {
+  margin-top: 5vh;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #0e0d0d; 
 }
 
 h1 {
@@ -73,7 +80,8 @@ h2{
   font-size: 20px;
   text-align: center;
   font-weight: bold;
-  color: darkslategrey;
+  color: rgb(19, 31, 31); 
+  -webkit-text-stroke: 0.1px rgb(255, 255, 255);
 }
 
 h3{
@@ -252,8 +260,5 @@ img{
     text-align: center; 
   }
   
-  .start {
-    margin-top: 5vh;
-    text-align: center; 
-  }
+ 
   

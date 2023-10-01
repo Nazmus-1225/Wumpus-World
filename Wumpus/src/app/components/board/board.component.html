@@ -4,19 +4,35 @@
     <h3>Treasure left: {{ treasure_left }}</h3>
     <h3 [innerText]="player.hasArrow ? 'Arrow: 1' : 'Arrow: 0'"></h3>
   </div>
-  <div class="board">
-    <div *ngFor="let row of board; let rowIndex = index" class="row">
-      <div *ngFor="let cell of row; let colIndex = index" class="cell" 
-           (click)="isBoardInteractive && revealCell(rowIndex, colIndex)">
 
-        <div class="image-container">
-          <div class="cell overlay-image" *ngIf="!cell.isHidden && cell.hasLight"></div>
-          <img *ngIf="!cell.isHidden || (rowIndex === player.position.row && colIndex === player.position.col)"
-            [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
-          <img *ngIf="cell.isHidden" src="assets/brick.png" alt="Brick" class="cell-image" />
+  <div class="board-container">
+    <div class="board">
+      <div *ngFor="let row of board; let rowIndex = index" class="row">
+        <div *ngFor="let cell of row; let colIndex = index" class="cell"
+          (click)="isBoardInteractive && revealCell(rowIndex, colIndex)">
 
-          <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/player.png"
-            alt="Player" class="player-image overlay-image" />
+          <div class="image-container">
+            <div class="cell overlay-image" *ngIf="!cell.isHidden && cell.hasLight"></div>
+            <img *ngIf="!cell.isHidden || (rowIndex === player.position.row && colIndex === player.position.col)"
+              [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
+            <img *ngIf="cell.isHidden" src="assets/brick.png" alt="Brick" class="cell-image" />
+
+            <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/player.png"
+              alt="Player" class="player-image overlay-image" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="board">
+      <div *ngFor="let row of board; let rowIndex = index" class="row">
+        <div *ngFor="let cell of row; let colIndex = index" class="cell">
+          <div class="image-container">
+            <img
+              [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
+          
+            <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/player.png"
+              alt="Player" class="player-image overlay-image" />
+          </div>
         </div>
       </div>
     </div>

@@ -71,7 +71,7 @@ export class BoardComponent implements OnInit {
         clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
-    }, 500); // Move after every 3 seconds
+    }, 500); // Move after every 0.5 seconds
   }
 
 
@@ -92,7 +92,7 @@ export class BoardComponent implements OnInit {
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
 
       //Updating current visit risk
-      this.generateGame.board[rowIndex][colIndex].visit_risk+=0.075;
+      this.generateGame.board[rowIndex][colIndex].visit_risk+=0.02;
       this.generateGame.board[rowIndex][colIndex].total_risk=this.generateGame.board[rowIndex][colIndex].risk_score+this.generateGame.board[rowIndex][colIndex].visit_risk;
 
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];

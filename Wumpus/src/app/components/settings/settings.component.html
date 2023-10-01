@@ -21,7 +21,7 @@
       <!-- Column 3 -->
       <h3 id="pits">Pits</h3>
       <div class="gameGrid">
-        <input type="range" min="2" max="6" value="5" class="slider" id="gridRange" (input)="pits($event)" />
+        <input type="range" min="2" max="15" value="5" class="slider" id="gridRange" (input)="pits($event)" />
         <h2 id="gridSize">{{ sliderPit }}</h2>
       </div>
     </div>
@@ -35,9 +35,9 @@
       <input class="form-control form-control-sm" id="formFileSm" type="file" (change)="onChange($event)">
     </div>
   </div>
-  <div class="start">
-    <button class="button-start" (click)="startGame()">
-      <h2 id="start">START</h2>
-    </button>
-  </div>
+</div>
+<div class="start">
+  <button class="button-start" (click)="startGame()">
+    <h2 id="start">START</h2>
+  </button>
 </div>
