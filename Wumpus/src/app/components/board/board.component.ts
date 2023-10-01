@@ -144,7 +144,6 @@ export class BoardComponent implements OnInit {
           visit_risk: 0,
           total_risk: 0,
           adjacentCells: this.helper.calculateAdjacentCells(row, col),
-          path_risk: 0,
           g_score: 0,
           f_score: 0,
         });

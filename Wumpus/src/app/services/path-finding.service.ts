@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Cell, CellType } from '../models/cell';
+import { Cell} from '../models/cell';
 import { HelperService } from './helper.service';
 
 @Injectable({
@@ -26,27 +26,23 @@ export class PathFindingService {
     );
   }
   findCellWithLeastDanger(start: Cell, targets: Cell[]): Cell | null {
-    // Initialize an array to store distances and paths for all targets
     const distancesAndPathsArray: {
       distance: number | undefined;
       path: Cell[];
     }[] = [];
 
     for (const target of targets) {
-      // Calculate the shortest path and distance to the current target
       const distancesAndPaths = this.findShortestPath(start, target);
 
-      // Get the distance and path for the current target and add it to the array
       distancesAndPathsArray.push(
         distancesAndPaths || { distance: undefined, path: [] }
       );
     }
 
-    // Initialize the least danger cell and shortest path length
     let leastDangerCell: Cell | null = null;
     let shortestPathLength = Number.MAX_VALUE;
     let shortestRisk = Number.MAX_VALUE;
-    // Find the least dangerous cell from the array of distances and paths
+   
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
       const { distance, path } = distancesAndPathsArray[i];
@@ -92,11 +88,10 @@ export class PathFindingService {
     const closedList = new Map<Cell, boolean>();
     const gScores = new Map<Cell, number>();
     const fScores = new Map<Cell, number>();
-    const paths = new Map<Cell, Cell[]>(); // Map to store paths
-
+    const paths = new Map<Cell, Cell[]>(); 
     gScores.set(start, 0);
     fScores.set(start, this.calculateHeuristic(start, target));
-    paths.set(start, [start]); // Initialize the path with the start cell
+    paths.set(start, [start]); 
 
     openList.push(start);
 
@@ -115,7 +110,7 @@ export class PathFindingService {
       );
 
       for (const neighbor of current.adjacentCells) {
-        if (closedList.has(neighbor)) continue; // Skip already evaluated cells
+        if (closedList.has(neighbor)) continue; 
         if (neighbor.isHidden && !this.areCellsEqual(neighbor, target)) {
           continue;
         }

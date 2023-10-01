@@ -32,8 +32,7 @@ export interface Cell {
     adjacentCells: Cell[];
     f_score: number; 
     g_score: number;
-    path_risk: number;
-    path?: Cell;
+
 
   }
 
