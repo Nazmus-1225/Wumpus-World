@@ -31,7 +31,7 @@ export class EvaluateService {
         cell.risk_score = -1;
         setTimeout(() => {
           this.AI.grabTreasure(row, col);
-        }, 400);
+        }, 200);
         break;
 
       case CellType.Wumpus:
@@ -50,10 +50,10 @@ export class EvaluateService {
       case CellType.Light:
         cell.risk_score = -0.1;
         break;
+
       case CellType.Smell:
       case CellType.Breeze:
       case CellType.BreezeAndSmell:
-        //  case CellType.Smell_Breeze_And_Light:
         cell.risk_score = 0.1;
         break;
 
@@ -62,13 +62,6 @@ export class EvaluateService {
         cell.risk_score = 0;
         break;
 
-      // case CellType.Empty:
-      //  case CellType.DeadWumpus:
-      //  case CellType.SmellAndLight:
-      //  case CellType.BreezeAndLight:
-      //    cell.risk_score = 0.0;
-      //   break;
-
     }
 
     cell.total_risk=cell.risk_score+cell.visit_risk;
@@ -76,18 +69,14 @@ export class EvaluateService {
     this.generateGame.board[row][col] = cell
     this.AI.exploredBoard[row][col] = cell;
 
-    // const adjacentCells = this.helper.calculateAdjacentCells(row, col); //Cell format
     const adjacentCells = this.AI.availableCells;
-    //console.log(cell);
 
     for (const offset of adjacentCells) {
       const adjacentRow = offset.position.row;
       const adjacentCol = offset.position.column;
 
-      const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol]; //position only
+      const adjacentCell = this.AI.exploredBoard[adjacentRow][adjacentCol]; 
 
-      //console.log("Current Before update: " + cell.total_risk);
-      //console.log("Adjacent Before update: " + adjacentCell.total_risk);
       this.updateAdjacentRisk(adjacentCell, cell);
 
       this.AI.exploredBoard[adjacentRow][adjacentCol]=adjacentCell;
@@ -95,9 +84,6 @@ export class EvaluateService {
 
       this.AI.exploredBoard[row][col]=cell;
       this.generateGame.board[row][col]=cell;
-
-      //console.log("Current After update: " + cell.total_risk);
-    //  console.log("Adjacent After update: " + adjacentCell.total_risk);
     }
 
   }
@@ -106,8 +92,6 @@ export class EvaluateService {
 
     //checking hidden cell from new position 
     if (adjacentCell.isHidden && currentCell.isHidden) {
-      // console.log("cell: " + adjacentCell.position.row + "," + adjacentCell.position.column)
-    //  console.log("Case 1");
 
       if (currentCell.type === CellType.Empty) {
         adjacentCell.pit_probability = 0.0;
@@ -153,20 +137,16 @@ export class EvaluateService {
 
     //checking revealed cell from new position 
     else if (!adjacentCell.isHidden && currentCell.isHidden) {
-     // console.log("Case 2");
-      // currentCell.risk_score += 0.075;
+    // Nothing happens
     }
-
     //checking hidden cell from visited position  //Is that possible? 
     else if (adjacentCell.isHidden && !currentCell.isHidden) {
-    //  console.log("Case 3");
-      currentCell.visit_risk += 0.01; // Eta ektu dekha lagbe
-      // currentCell.risk_score += parseFloat(0.075.toFixed(3)); // 3 decimal point
+      currentCell.visit_risk += 0.01;
+    
     }
 
     //Already been there.
     else {
-   //   console.log("Case 4");
       currentCell.visit_risk += 0.02;
     }
 
@@ -185,10 +165,6 @@ export class EvaluateService {
   }
 
 
-
-
-
-
   updateScore(row: number, col: number) {
     this.AI.player.point -= 1;
 
@@ -198,6 +174,7 @@ export class EvaluateService {
       this.generateGame.treasure_left--;
       console.log(this.generateGame.treasure_left)
       if (this.generateGame.treasure_left === 0) {
+        this.helper.playAudio("./assets/audio/win.mp3");
         this.showMessage("Congratulations! You found all the Treasure.");
         this.isGameOver = true;
         return;
@@ -208,6 +185,7 @@ export class EvaluateService {
     else if (this.generateGame.board[row][col].type == CellType.Wumpus) {
       this.AI.player.point -= 1000;
       this.AI.exploredBoard[row][col] = this.generateGame.board[row][col]
+      this.helper.playAudio("./assets/audio/lost.mp3");
       this.showMessage("Oops! Wumpus found you. Game over");
       this.isGameOver = true;
       return;
@@ -218,11 +196,10 @@ export class EvaluateService {
       || this.generateGame.board[row][col].type == CellType.SmellAndPit
       || this.generateGame.board[row][col].type == CellType.LightAndPit) {
       this.AI.player.point -= 1000;
+      this.helper.playAudio("./assets/audio/pit.wav");
       this.showMessage("Oops! You fell on a pit. Game over")
       this.isGameOver = true;
       return;
-      // alert('You fell on a pit!');
-      // this.player.position = { row: 0, col: 0 };
     }
 
   }
@@ -239,6 +216,7 @@ export class EvaluateService {
     });
     dialogRef.disableClose = true;
   }
+
   revealBoard() {
     for (let row of this.generateGame.board) {
       for (let cell of row) {
@@ -246,9 +224,10 @@ export class EvaluateService {
       }
     }
   }
+  
   gameOver() {
     if (this.AI.player.point <= 0) {
-      //   console.log("mara kha" + this.AI.player.point);
+      this.helper.playAudio("./assets/audio/lost.mp3");
       this.showMessage('Sorry. No moves left. Game Over.');
       this.isGameOver = true;
       this.revealBoard();

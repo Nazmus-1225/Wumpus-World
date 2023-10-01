@@ -44,20 +44,16 @@ export class BoardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    //  this.player = this.AI.player;
     this.AI.player.point = 100;
     this.treasure_left = this.generateGame.treasure_left;
     this.initializeBoard();
     this.board = this.generateGame.getBoard();
     this.generateGame.placePitsWumpusTreasure();
-    //get the board
-    // this.playGame(); // not implemented yet
-    // console.log('BoardComponent initialized');
-
+  
   }
-  revealBoard() {
-    this.evaluate.revealBoard();
-  }
+  // revealBoard() {
+  //   this.evaluate.revealBoard();
+  // }
 
 
   playGame() {
@@ -66,19 +62,17 @@ export class BoardComponent implements OnInit {
         this.evaluate.gameOver();
         const { row, column } = this.AI.makeAIMove();
         this.revealCell(row, column);
-        
+
       } else {
         clearInterval(this.gameInterval);
         this.evaluate.isGameOver = true;
       }
-    }, 300); // Move after every 3 seconds
+    }, 300);
   }
 
   revealCell(rowIndex: number, colIndex: number): void {
-    
-    if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
 
-      // this.generateGame.board[rowIndex][colIndex].isHidden = false;  //eta pore false korsi
+    if (!this.evaluate.isGameOver && this.isMoveAvailable(rowIndex, colIndex)) {
 
       this.player.position = this.AI.player.position = { row: rowIndex, col: colIndex };
       this.AI.availableCells = this.helper.calculateAdjacentCells(this.player.position.row, this.player.position.col);
@@ -86,18 +80,17 @@ export class BoardComponent implements OnInit {
 
       this.evaluate.updateScore(rowIndex, colIndex);
       this.evaluate.updateRisk(rowIndex, colIndex);
-      
+
       this.treasure_left = this.generateGame.treasure_left;
 
       this.generateGame.board[rowIndex][colIndex].isHidden = false;
 
       //Updating current visit risk
-      this.generateGame.board[rowIndex][colIndex].visit_risk+=0.02;
-      this.generateGame.board[rowIndex][colIndex].total_risk=this.generateGame.board[rowIndex][colIndex].risk_score+this.generateGame.board[rowIndex][colIndex].visit_risk;
+      this.generateGame.board[rowIndex][colIndex].visit_risk += 0.02;
+      this.generateGame.board[rowIndex][colIndex].total_risk = this.generateGame.board[rowIndex][colIndex].risk_score + this.generateGame.board[rowIndex][colIndex].visit_risk;
 
       this.AI.exploredBoard[rowIndex][colIndex] = this.generateGame.board[rowIndex][colIndex];
       this.board[rowIndex][colIndex] = this.AI.exploredBoard[rowIndex][colIndex];
-      // this.generateGame.board[rowIndex][colIndex].risk_score = this.AI.exploredBoard[rowIndex][colIndex].risk_score;
       this.board = this.AI.exploredBoard;
       this.player = this.AI.player;
     }
@@ -105,7 +98,7 @@ export class BoardComponent implements OnInit {
 
 
   ngOnDestroy(): void {
-    clearInterval(this.gameInterval); // Stop the game interval
+    clearInterval(this.gameInterval);
   }
 
   togglePause() {
@@ -145,9 +138,9 @@ export class BoardComponent implements OnInit {
           visit_risk: 0,
           total_risk: 0,
           adjacentCells: this.helper.calculateAdjacentCells(row, col),
-          path_risk:0,
-          g_score:0,
-          f_score:0,
+          path_risk: 0,
+          g_score: 0,
+          f_score: 0,
         });
       }
 
@@ -167,31 +160,31 @@ export class BoardComponent implements OnInit {
   getCellImage(cellType: CellType): string {
     switch (cellType) {
       case CellType.Wumpus:
-        return 'assets/wumpus.png';
+        return 'assets/images/wumpus.png';
       case CellType.DeadWumpus:
-        return 'assets/deadWumpus.png';
+        return 'assets/images/deadWumpus.png';
       case CellType.Pit:
-        return 'assets/hole.png';
+        return 'assets/images/hole.png';
       case CellType.Breeze:
-        return 'assets/breeze.png';
+        return 'assets/images/breeze.png';
       case CellType.Treasure:
-        return 'assets/Treasure.jpg';
+        return 'assets/images/Treasure.jpg';
       case CellType.Smell:
-        return 'assets/smell.png';
+        return 'assets/images/smell.png';
       case CellType.Light:
-        return 'assets/light.jpg';
+        return 'assets/images/light.jpg';
       case CellType.BreezeAndSmell:
-        return 'assets/bs.png';
+        return 'assets/images/bs.png';
       case CellType.LightAndPit:
-        return 'assets/LightAndPit.jpg';
+        return 'assets/images/LightAndPit.jpg';
       case CellType.BreezeAndLight:
-        return 'assets/LightAndBreeze.jpg';
+        return 'assets/images/LightAndBreeze.jpg';
       case CellType.SmellAndLight:
-        return 'assets/LightAndSmell.jpg';
+        return 'assets/images/LightAndSmell.jpg';
       case CellType.Smell_Breeze_And_Light:
-        return 'assets/light_smell_breeze.jpg';
+        return 'assets/images/light_smell_breeze.jpg';
       case CellType.Empty:
-        return 'assets/bg.png';
+        return 'assets/images/bg.png';
 
       default:
         return '';

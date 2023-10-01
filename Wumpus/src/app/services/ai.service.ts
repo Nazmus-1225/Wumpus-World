@@ -23,7 +23,7 @@ export class AIService {
   randomRow: number = 0;
   randomCol: number = 0;
   player: Player = new Player();
-  availableCells: Cell[] = [];  //Updated in board.ts -> revealCell
+  availableCells: Cell[] = [];
   all_Unvisited_Cells: Cell[] = [];
   arrowShot = false;
   exploredBoard: Cell[][] = [];
@@ -33,26 +33,15 @@ export class AIService {
       //Shoot wumpus
       for (const cell of this.availableCells) {
         if (cell.wumpus_probability > 0.8 && !this.arrowShot) {
-          this.shootArrow(cell.position.row, cell.position.column);
+          setTimeout(() => {
+            this.shootArrow(cell.position.row, cell.position.column);
+          }, 200);
+
           this.arrowShot = true;
           return { row: -1, column: -1 };
         }
       }
 
-       //without path
-  //     let lowestRiskCell = this.availableCells[0];
-  //     for (const cell of this.availableCells) {
-  //       if (cell.total_risk < lowestRiskCell.total_risk) {
-  //         lowestRiskCell = cell;
-  //       }
-  //     }
-  //  lowestRiskCell.adjacentCells=this.helper.calculateAdjacentCells(lowestRiskCell.position.row,lowestRiskCell.position.column)
-  //     return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
-
-      //------------without path
-
-
-      //with path
       const newAdjacentUnvisitedCells = this.helper.calculateAdjacentUnvisitedCells(this.player.position.row, this.player.position.col);
       this.all_Unvisited_Cells.push(...newAdjacentUnvisitedCells);
 
@@ -65,9 +54,7 @@ export class AIService {
       } else {
         console.log("No cell with the least danger found.");
         return { row: -1, column: -1 };
-     }
-
-      //----------------with path
+      }
 
 
     } else {
@@ -84,19 +71,36 @@ export class AIService {
       this.exploredBoard[row][col] = this.generateGame.board[row][col];
 
       if (this.generateGame.board[row][col].type === CellType.Wumpus) {
-        this.showMessage("You killed the wumpus!");
+
+        setTimeout(() => {
+          this.helper.playAudio("./assets/audio/wumpusKill.wav");
+          this.showMessage("You killed the wumpus!");
+        }, 200);
         this.generateGame.board[row][col].type = CellType.DeadWumpus;
 
         //remove smell from adjacents
         const adjacentCells = this.helper.calculateAdjacentCells(row, col);
         for (const adjacentCell of adjacentCells) {
-          if (adjacentCell.type === CellType.Smell) {
-            adjacentCell.type = CellType.Empty;
-            const adjacentRow = adjacentCell.position.row;
-            const adjacentCol = adjacentCell.position.column;
-            this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
+          switch (adjacentCell.type) {
+            case CellType.Smell:
+              adjacentCell.type = CellType.Empty;
+              break;
+            case CellType.BreezeAndSmell:
+              adjacentCell.type = CellType.Breeze;
+              break;
+            case CellType.SmellAndLight:
+              adjacentCell.type = CellType.Light;
+              break;
+            case CellType.Smell_Breeze_And_Light:
+              adjacentCell.type = CellType.BreezeAndLight;
+              break;
           }
+
+          const adjacentRow = adjacentCell.position.row;
+          const adjacentCol = adjacentCell.position.column;
+          this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
         }
+
       }
       else {
         this.showMessage("There wasn't any wumpus here.");
@@ -104,6 +108,7 @@ export class AIService {
     }
 
     else {
+      this.helper.playAudio("./assets/audio/lost.mp3");
       this.showMessage('You have no arrow left')
     }
 
@@ -112,35 +117,37 @@ export class AIService {
   grabTreasure(row: number, col: number) {
     if (this.generateGame.board[row][col].type === CellType.Treasure) {
       this.generateGame.board[row][col].isHidden = false;
+      this.helper.playAudio("./assets/audio/goldFound.wav");
       this.showMessage("You got a treasure!");
       this.generateGame.board[row][col].type = CellType.Empty;
+
       //remove light from adjacents
       const adjacentCells = this.helper.calculateAdjacentCells(row, col);
       for (const adjacentCell of adjacentCells) {
-        if (adjacentCell.type === CellType.Light) {
-          adjacentCell.type = CellType.Empty;
-          const adjacentRow = adjacentCell.position.row;
-          const adjacentCol = adjacentCell.position.column;
-          this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
+        switch (adjacentCell.type) {
+          case CellType.Light:
+            adjacentCell.type = CellType.Empty;
+            break;
+          case CellType.BreezeAndLight:
+            adjacentCell.type = CellType.Breeze;
+            break;
+          case CellType.SmellAndLight:
+            adjacentCell.type = CellType.Smell;
+            break;
+          case CellType.Smell_Breeze_And_Light:
+            adjacentCell.type = CellType.BreezeAndSmell;
+            break;
         }
 
-        else if (adjacentCell.type === CellType.BreezeAndLight) {
-          adjacentCell.type = CellType.Breeze;
-          const adjacentRow = adjacentCell.position.row;
-          const adjacentCol = adjacentCell.position.column;
-          this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
-        }
-        
-        else if (adjacentCell.type === CellType.SmellAndLight) {
-          adjacentCell.type = CellType.Smell;
-          const adjacentRow = adjacentCell.position.row;
-          const adjacentCol = adjacentCell.position.column;
-          this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
-        }
+        const adjacentRow = adjacentCell.position.row;
+        const adjacentCol = adjacentCell.position.column;
+        this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
       }
+
     }
 
   }
+
   showMessage(message: string): void {
     const dialogRef = this.dialog.open(MessageModalComponent, {
       width: '300px',

@@ -15,9 +15,9 @@
             <div class="cell overlay-image" *ngIf="!cell.isHidden && cell.hasLight"></div>
             <img *ngIf="!cell.isHidden || (rowIndex === player.position.row && colIndex === player.position.col)"
               [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
-            <img *ngIf="cell.isHidden" src="assets/brick.png" alt="Brick" class="cell-image" />
+            <img *ngIf="cell.isHidden" src="assets/images/brick.png" alt="Brick" class="cell-image" />
 
-            <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/player.png"
+            <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/images/player.png"
               alt="Player" class="player-image overlay-image" />
           </div>
         </div>
@@ -30,7 +30,7 @@
             <img
               [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
           
-            <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/player.png"
+            <img *ngIf="rowIndex === player.position.row && colIndex === player.position.col" src="assets/images/player.png"
               alt="Player" class="player-image overlay-image" />
           </div>
         </div>
@@ -41,7 +41,7 @@
 
     <button class="start-button" (click)="startAsHuman()">Start as Human</button>
     <button class="start-button" (click)="startAsAI()">Start as AI</button>
-    <button class="shoot-button" (click)="revealBoard()">reveal board</button>
+    <!-- <button class="shoot-button" (click)="revealBoard()">reveal board</button> -->
   </div>
 
   <div class="shoot-buttons-container" *ngIf="isHumanMode">

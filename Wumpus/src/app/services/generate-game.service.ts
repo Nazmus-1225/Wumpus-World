@@ -32,9 +32,6 @@ export class GenerateGameService {
     this.parsedBoardData = boardData;
   }
 
-  getParsedBoardData(): string[][] {
-    return this.parsedBoardData;
-  }
   setwumpusCount(wumpus_count: number) {
     console.log('Wumpus Count ' + wumpus_count);
     this.wumpus_count = wumpus_count;
@@ -47,6 +44,7 @@ export class GenerateGameService {
     console.log('Gold count ' + treasure_count);
     this.treasure_count = treasure_count;
   }
+  
   setCustomInput(custom_input: boolean) {
     this.custom_input = custom_input;
   }
@@ -78,32 +76,6 @@ export class GenerateGameService {
         return CellType.Treasure;
       case '_':
         return CellType.Empty;
-
-      // case 'T':
-      //   return CellType.Treasure;
-      // case 'S':
-      //   return CellType.Smell;
-      // case 'B':
-      //   return CellType.Breeze;
-      // case 'L':
-      //   return CellType.Light;
-      // case 'E':
-      //   return CellType.Empty;
-    
-      // case 'A':
-      //   return CellType.BreezeAndSmell;
-      // case 'C':
-      //   return CellType.BreezeAndLight;
-      // case 'D':
-      //   return CellType.SmellAndLight;
-      // case 'F':
-      //   return CellType.SmellAndPit;
-      // case 'H':
-      //   return CellType.LightAndPit;
-      // case 'I':
-      //   return CellType.BreezeAndPit;
-      // case 'J':
-      //   return CellType.Smell_Breeze_And_Light;
       default:
         return CellType.Empty;
     }

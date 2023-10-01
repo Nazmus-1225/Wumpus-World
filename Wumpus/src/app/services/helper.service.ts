@@ -48,28 +48,6 @@ export class HelperService {
   
     return adjacentUnvisitedCells;
   }
-  calculateAdjacentVisitedCells(row: number, col: number): Cell[] {
-    const adjacentCellPositions = [
-        { row: row - 1, col },
-        { row: row + 1, col },
-        { row, col: col - 1 },
-        { row, col: col + 1 },
-    ];
-
-    const validAdjacentVisitedCellPositions = adjacentCellPositions.filter(
-        (position) =>
-            this.isValidCellPosition(position.row, position.col) &&
-            !this.generateGame.board[position.row][position.col].isHidden
-    );
-
-    const adjacentVisitedCells = validAdjacentVisitedCellPositions.map(
-        (position) => this.generateGame.board[position.row][position.col]
-    );
-
-    return adjacentVisitedCells;
-}
-
-
 
 
   isValidCellPosition(row: number, col: number): boolean {
@@ -80,4 +58,15 @@ export class HelperService {
       col < this.generateGame.board[0].length
     );
   }
+
+  private audio: HTMLAudioElement = new Audio();
+
+  playAudio(audioSource: string): void {
+    this.audio.src = audioSource;
+    this.audio.load();
+    this.audio.play();
+    // this.audio.volume = 0.1;
+
+  }
+
 }
