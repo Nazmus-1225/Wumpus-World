@@ -213,8 +213,10 @@ export class EvaluateService {
     })
     dialogRef.afterClosed().subscribe(() => {
       this.router.navigate(['settings']);
+      // window.location.reload();
     });
     dialogRef.disableClose = true;
+    
   }
 
   revealBoard() {
@@ -224,7 +226,7 @@ export class EvaluateService {
       }
     }
   }
-  
+
   gameOver() {
     if (this.AI.player.point <= 0) {
       this.helper.playAudio("./assets/audio/lost.mp3");

@@ -153,12 +153,12 @@ export class AIService {
       width: '300px',
       data: { message }
     })
-    dialogRef.afterClosed().subscribe(() => {
-    });
+  
     dialogRef.disableClose = true;
+
+    setTimeout(() => {
+      dialogRef.close();
+    }, 2000);
   }
 
 }
-
-
-

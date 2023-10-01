@@ -21,10 +21,14 @@ export class BoardComponent implements OnInit {
 
   board: Cell[][] = [];
   player: Player = new Player();
+  treasure: number = this.generateGame.treasure_count;
+  wumpus: number = this.generateGame.wumpus_count;
+  pit: number = this.generateGame.pit_count;
   treasure_left: number = this.generateGame.treasure_left;
   buttonsPressed: boolean = false;
   isBoardInteractive: boolean = true;
   isHumanMode: boolean = false;
+  isAIMode: boolean =false;
   gameInterval: any;
   isGamePaused: boolean = false;
   isPauseButtonVisible: boolean = false;
@@ -37,6 +41,7 @@ export class BoardComponent implements OnInit {
 
   startAsAI() {
     this.isHumanMode = false;
+    this.isAIMode=true;
     this.isPauseButtonVisible = true;
     this.playGame();
     this.isBoardInteractive = false;
@@ -68,6 +73,7 @@ export class BoardComponent implements OnInit {
         this.evaluate.isGameOver = true;
       }
     }, 300);
+   
   }
 
   revealCell(rowIndex: number, colIndex: number): void {
