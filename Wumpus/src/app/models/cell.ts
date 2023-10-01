@@ -29,6 +29,11 @@ export interface Cell {
     risk_score: number;
     visit_risk: number;
     total_risk: number;
+    adjacentCells: Cell[];
+    f_score: number; 
+    g_score: number;
+    path_risk: number;
+    path?: Cell;
 
   }
 

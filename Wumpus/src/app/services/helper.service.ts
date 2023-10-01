@@ -48,7 +48,27 @@ export class HelperService {
   
     return adjacentUnvisitedCells;
   }
-  
+  calculateAdjacentVisitedCells(row: number, col: number): Cell[] {
+    const adjacentCellPositions = [
+        { row: row - 1, col },
+        { row: row + 1, col },
+        { row, col: col - 1 },
+        { row, col: col + 1 },
+    ];
+
+    const validAdjacentVisitedCellPositions = adjacentCellPositions.filter(
+        (position) =>
+            this.isValidCellPosition(position.row, position.col) &&
+            !this.generateGame.board[position.row][position.col].isHidden
+    );
+
+    const adjacentVisitedCells = validAdjacentVisitedCellPositions.map(
+        (position) => this.generateGame.board[position.row][position.col]
+    );
+
+    return adjacentVisitedCells;
+}
+
 
 
 

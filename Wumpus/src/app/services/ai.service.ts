@@ -4,7 +4,8 @@ import { Player } from '../models/player.model';
 import { Cell, CellType } from '../models/cell';
 import { HelperService } from './helper.service';
 import { PathFindingService } from './path-finding.service';
-import { EvaluateService } from './evaluate.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MessageModalComponent } from '../components/message-modal/message-modal.component';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class AIService {
   constructor(
     private generateGame: GenerateGameService,
     private helper: HelperService,
-    private path: PathFindingService
+    private path: PathFindingService,
+    private dialog: MatDialog
   ) { }
 
   randomRow: number = 0;
@@ -37,41 +39,33 @@ export class AIService {
         }
       }
 
-      // this.evaluate.updateRisk(this.player.position.row, this.player.position.col); 
-
-      //without path
-      let lowestRiskCell = this.availableCells[0];
-      console.log("Adjacent Risk score: ");
-      for (const cell of this.availableCells) {
-        console.log(cell.total_risk);
-
-        if (cell.total_risk < lowestRiskCell.total_risk) {
-          lowestRiskCell = cell;
-        }
-      }
-      console.log("Lowest: "+lowestRiskCell.position.row+" , "+lowestRiskCell.position.column+" , "+lowestRiskCell.isHidden);
-      console.log("lowest risk: "+lowestRiskCell.total_risk);
-      return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
+       //without path
+  //     let lowestRiskCell = this.availableCells[0];
+  //     for (const cell of this.availableCells) {
+  //       if (cell.total_risk < lowestRiskCell.total_risk) {
+  //         lowestRiskCell = cell;
+  //       }
+  //     }
+  //  lowestRiskCell.adjacentCells=this.helper.calculateAdjacentCells(lowestRiskCell.position.row,lowestRiskCell.position.column)
+  //     return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
 
       //------------without path
 
 
       //with path
-      // const newAdjacentUnvisitedCells = this.helper.calculateAdjacentUnvisitedCells(this.player.position.row, this.player.position.col);
-      // this.all_Unvisited_Cells.push(...newAdjacentUnvisitedCells);
+      const newAdjacentUnvisitedCells = this.helper.calculateAdjacentUnvisitedCells(this.player.position.row, this.player.position.col);
+      this.all_Unvisited_Cells.push(...newAdjacentUnvisitedCells);
 
-      // console.log(newAdjacentUnvisitedCells);
+      const currentCell = this.generateGame.board[this.player.position.row][this.player.position.col];
+      let lowestRiskCell = this.path.findCellWithLeastDanger(currentCell, this.all_Unvisited_Cells);
 
-      // const currentCell = this.generateGame.board[this.player.position.row][this.player.position.col];
-
-      // let lowestRiskCell = this.path.findCellWithLeastDanger(currentCell, this.all_Unvisited_Cells, this.generateGame.board);
-
-      // if (lowestRiskCell != null) {
-      //   console.log("row: " + lowestRiskCell.position.row + " column: " + lowestRiskCell.position.column);
-      //   return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
-      // }
-      // else
-      //   return { row: -1, column: -1 }
+      if (lowestRiskCell != null) {
+        this.all_Unvisited_Cells = this.all_Unvisited_Cells.filter((target) => !this.path.areCellsEqual(target, lowestRiskCell));
+        return { row: lowestRiskCell.position.row, column: lowestRiskCell.position.column };
+      } else {
+        console.log("No cell with the least danger found.");
+        return { row: -1, column: -1 };
+     }
 
       //----------------with path
 
@@ -82,7 +76,6 @@ export class AIService {
     }
   }
 
-
   shootArrow(row: number, col: number) {
     if (this.player.hasArrow) {
       this.player.hasArrow = false;
@@ -91,7 +84,7 @@ export class AIService {
       this.exploredBoard[row][col] = this.generateGame.board[row][col];
 
       if (this.generateGame.board[row][col].type === CellType.Wumpus) {
-        alert("You killed the wumpus!");
+        this.showMessage("You killed the wumpus!");
         this.generateGame.board[row][col].type = CellType.DeadWumpus;
 
         //remove smell from adjacents
@@ -106,12 +99,12 @@ export class AIService {
         }
       }
       else {
-        alert("There wasn't any wumpus here.");
+        this.showMessage("There wasn't any wumpus here.");
       }
     }
 
     else {
-      alert('You have no arrow left')
+      this.showMessage('You have no arrow left')
     }
 
   }
@@ -119,7 +112,7 @@ export class AIService {
   grabTreasure(row: number, col: number) {
     if (this.generateGame.board[row][col].type === CellType.Treasure) {
       this.generateGame.board[row][col].isHidden = false;
-      alert("You got a treasure!");
+      this.showMessage("You got a treasure!");
       this.generateGame.board[row][col].type = CellType.Empty;
       //remove light from adjacents
       const adjacentCells = this.helper.calculateAdjacentCells(row, col);
@@ -148,7 +141,15 @@ export class AIService {
     }
 
   }
-
+  showMessage(message: string): void {
+    const dialogRef = this.dialog.open(MessageModalComponent, {
+      width: '300px',
+      data: { message }
+    })
+    dialogRef.afterClosed().subscribe(() => {
+    });
+    dialogRef.disableClose = true;
+  }
 
 }
 

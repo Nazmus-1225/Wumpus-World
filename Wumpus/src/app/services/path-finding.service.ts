@@ -3,164 +3,153 @@ import { Cell, CellType } from '../models/cell';
 import { HelperService } from './helper.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PathFindingService {
+  constructor(private helper: HelperService) {}
 
-  constructor(private helper: HelperService) { }
- 
-  findCellWithLeastDanger(
-    start: Cell,
-    targets: Cell[],
-    grid: Cell[][]
-  ): Cell | null {
-    // Dijkstra's algorithm to find the shortest path to all cells
-    const shortestPaths = this.dijkstra(start, grid);
-  
+  areCellsEqual(cell1: Cell | null, cell2: Cell | null): boolean {
+    if (cell1 != null && cell2 != null) {
+      return (
+        cell1.position.row === cell2.position.row &&
+        cell1.position.column === cell2.position.column
+      );
+    } else {
+      return false;
+    }
+  }
+
+  calculateHeuristic(current: Cell, target: Cell): number {
+    return (
+      Math.abs(current.position.row - target.position.row) +
+      Math.abs(current.position.column - target.position.column)
+    );
+  }
+  findCellWithLeastDanger(start: Cell, targets: Cell[]): Cell | null {
+    // Initialize an array to store distances and paths for all targets
+    const distancesAndPathsArray: {
+      distance: number | undefined;
+      path: Cell[];
+    }[] = [];
+
+    for (const target of targets) {
+      // Calculate the shortest path and distance to the current target
+      const distancesAndPaths = this.findShortestPath(start, target);
+
+      // Get the distance and path for the current target and add it to the array
+      distancesAndPathsArray.push(
+        distancesAndPaths || { distance: undefined, path: [] }
+      );
+    }
+
+    // Initialize the least danger cell and shortest path length
     let leastDangerCell: Cell | null = null;
     let shortestPathLength = Number.MAX_VALUE;
-  
-    for (const target of targets) {
-      const targetPathLength = shortestPaths[target.position.row][target.position.column].distance;
-      if (targetPathLength < shortestPathLength) {
-        shortestPathLength = targetPathLength;
-        leastDangerCell = target;
+    let shortestRisk = Number.MAX_VALUE;
+    // Find the least dangerous cell from the array of distances and paths
+    for (let i = 0; i < targets.length; i++) {
+      const target = targets[i];
+      const { distance, path } = distancesAndPathsArray[i];
+      let pathRisk = 0;
+      path.forEach((cell) => {
+        pathRisk += cell.total_risk + target.total_risk;
+      });
+      console.log(
+        `Distance to Target: ${distance}` +
+          ' row ' +
+          target.position.column +
+          ' column ' +
+          target.position.row
+      );
+      console.log(
+        'Path to Target:',
+        path.map(
+          (cell) =>
+            ' row ' + cell.position.column + ' column ' + cell.position.row
+        )
+      );
+      console.log(`Total Risk for Path: ${pathRisk}`);
+      // if (distance !== undefined && distance < shortestPathLength) {
+      //     shortestPathLength = distance;
+      //     leastDangerCell = target;
+      // }
+      if (pathRisk < shortestRisk) {
+        shortestRisk = pathRisk;
+        leastDangerCell = path[1];
       }
     }
-  
+
+ 
+
     return leastDangerCell;
   }
-  
-   dijkstra(start: Cell, grid: Cell[][]): { distance: number; previous: Cell | null }[][] {
-    const numRows = grid.length;
-    const numCols = grid[0].length;
-  
-    const distances: { distance: number; previous: Cell | null }[][] = [];
-  
-    for (let row = 0; row < numRows; row++) {
-      distances[row] = [];
-      for (let col = 0; col < numCols; col++) {
-        distances[row][col] = { distance: Number.MAX_VALUE, previous: null };
-      }
-    }
-  
-    distances[start.position.row][start.position.column].distance = 0;
-  
-    const unvisitedCells: Cell[] = [];
-  
-    for (let row = 0; row < numRows; row++) {
-      for (let col = 0; col < numCols; col++) {
-        unvisitedCells.push(grid[row][col]);
-      }
-    }
-  
-    while (unvisitedCells.length > 0) {
-      unvisitedCells.sort(
-        (a, b) => distances[a.position.row][a.position.column].distance - distances[b.position.row][b.position.column].distance
+
+  findShortestPath(
+    start: Cell,
+    target: Cell
+  ): { distance: number; path: Cell[] } | null {
+    const openList: Cell[] = [];
+    const closedList = new Map<Cell, boolean>();
+    const gScores = new Map<Cell, number>();
+    const fScores = new Map<Cell, number>();
+    const paths = new Map<Cell, Cell[]>(); // Map to store paths
+
+    gScores.set(start, 0);
+    fScores.set(start, this.calculateHeuristic(start, target));
+    paths.set(start, [start]); // Initialize the path with the start cell
+
+    openList.push(start);
+
+    while (openList.length > 0) {
+      openList.sort((a, b) => (fScores.get(a) || 0) - (fScores.get(b) || 0));
+
+      const current = openList.shift();
+
+      if (!current) break;
+
+      closedList.set(current, true);
+
+      current.adjacentCells = this.helper.calculateAdjacentCells(
+        current.position.row,
+        current.position.column
       );
-      const closestCell = unvisitedCells.shift() as Cell;
-  
-      if (distances[closestCell.position.row][closestCell.position.column].distance === Number.MAX_VALUE) {
-        break;
-      }
-  
-      const neighbors = this.helper.calculateAdjacentCells(closestCell.position.row, closestCell.position.column);
-  
-      for (const neighbor of neighbors) {
-        const alt = distances[closestCell.position.row][closestCell.position.column].distance + 1;
-        if (alt < distances[neighbor.position.row][neighbor.position.column].distance) {
-          distances[neighbor.position.row][neighbor.position.column].distance = alt;
-          distances[neighbor.position.row][neighbor.position.column].previous = closestCell;
+
+      for (const neighbor of current.adjacentCells) {
+        if (closedList.has(neighbor)) continue; // Skip already evaluated cells
+        if (neighbor.isHidden && !this.areCellsEqual(neighbor, target)) {
+          continue;
+        }
+        const tentativeGScore = (gScores.get(current) || 0) + 1;
+
+        if (
+          !openList.includes(neighbor) ||
+          tentativeGScore < (gScores.get(neighbor) || 0)
+        ) {
+          gScores.set(neighbor, tentativeGScore);
+          fScores.set(
+            neighbor,
+            tentativeGScore + this.calculateHeuristic(neighbor, target)
+          );
+
+          // Update the path to the neighbor
+          paths.set(neighbor, [...paths.get(current)!, neighbor]);
+
+          if (neighbor === target) {
+            // If the neighbor is the target, return the distance and path
+            return {
+              distance: gScores.get(neighbor) || 0,
+              path: paths.get(neighbor) || [],
+            };
+          }
+
+          if (!openList.includes(neighbor)) {
+            openList.push(neighbor);
+          }
         }
       }
     }
-  
-    return distances;
+
+    // If no path is found to the target, return null
+    return null;
   }
-  
-  
 }
-
-
-//Mubin
-// function findPath(startX: number, startY: number, targetX: number, targetY: number) {
-//     const openList = []; // Priority queue of open nodes
-//     const closedList = new Set(); // Set of closed nodes
-
-//     const startNode = new Node(startX, startY);
-//     const targetNode = new Node(targetX, targetY);
-
-//     openList.push(startNode);
-
-//     while (openList.length > 0) {
-//         // Find the node with the lowest f score in the open list
-//         const currentNode = openList.reduce((minNode, node) =>
-//             node.f < minNode.f ? node : minNode, openList[0]);
-
-//         // Remove the current node from the open list
-//         openList.splice(openList.indexOf(currentNode), 1);
-
-//         // Add the current node to the closed list
-//         closedList.add(${currentNode.x}-${currentNode.y});
-
-//         // Check if we've reached the target
-//         if (currentNode.x === targetNode.x && currentNode.y === targetNode.y) {
-//             const path = [];
-//             let current = currentNode;
-
-//             while (current) {
-//                 path.unshift({ x: current.x, y: current.y });
-//                 current = current.parent;
-//             }
-
-//             return path;
-//         }
-
-//         // Generate neighbor nodes
-//         const neighbors = [
-//             { x: currentNode.x - 1, y: currentNode.y },
-//             { x: currentNode.x + 1, y: currentNode.y },
-//             { x: currentNode.x, y: currentNode.y - 1 },
-//             { x: currentNode.x, y: currentNode.y + 1 },
-//         ];
-
-//         for (const neighbor of neighbors) {
-//             const [nx, ny] = [neighbor.x, neighbor.y];
-
-//             // Skip if neighbor is out of bounds or in closed list
-//             if (
-//                 nx < 0 || nx >= 10 ||
-//                 ny < 0 || ny >= 10 ||
-//                 closedList.has(${nx}-${ny})
-//             ) {
-//                 continue;
-//             }
-
-//             if (!recordedPositions[ny].some(cell => cell.x === nx && cell.y === ny) && !(nx === targetX && ny === targetY)) {
-//                 continue;
-//             }
-
-//             // Calculate tentative g score
-//             const gScore = currentNode.g + 1; // Assuming uniform cost
-
-//             // Check if neighbor is not in the open list or has a lower g score
-//             let neighborNode = openList.find(node => node.x === nx && node.y === ny);
-
-//             if (!neighborNode || gScore < neighborNode.g) {
-//                 if (!neighborNode) {
-//                     neighborNode = new Node(nx, ny);
-//                     openList.push(neighborNode);
-//                 }
-
-//                 neighborNode.parent = currentNode;
-//                 neighborNode.g = gScore;
-//                 neighborNode.h = calculateHeuristic(nx, ny, targetX, targetY);
-//             }
-//         }
-//     }
-// }
-
-// // Calculate Manhattan distance heuristic
-// function calculateHeuristic(x1: number, y1: number, x2: number, y2: number) {
-//     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
-// }

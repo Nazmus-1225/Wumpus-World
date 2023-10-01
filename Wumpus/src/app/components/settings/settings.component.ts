@@ -52,7 +52,7 @@ treasureCount: number=0;
         for (const row of rows) {
           // Remove spaces and split the row into columns based on whitespace
           const columns = row.trim().split(/\s+/);
-          this.treasureCount += (row.match(/T/g) || []).length;
+          this.treasureCount += (row.match(/G/g) || []).length;
           // Add the columns to the parsed board
           this.parsedBoard.push(columns);
         }

@@ -62,7 +62,7 @@ export class GenerateGameService {
         for (let col = 0; col < 10; col++) {
           const char = this.parsedBoardData[row][col];
           const cellType = this.mapCharacterToCellType(char);
-          this.board[row][col].type = cellType;
+          this.board[col][row].type = cellType;
         }
       }
       this.calculateBreezeSmellAndLight();
