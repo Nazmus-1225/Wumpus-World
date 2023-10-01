@@ -16,7 +16,7 @@
           (click)="isBoardInteractive && revealCell(rowIndex, colIndex)">
 
           <div class="image-container">
-            <div class="cell overlay-image" *ngIf="!cell.isHidden && cell.hasLight"></div>
+            
             <img *ngIf="!cell.isHidden || (rowIndex === player.position.row && colIndex === player.position.col)"
               [src]="getCellImage(cell.type)" alt="{{ cell.type }}" class="cell-image overlay-image">
             <img *ngIf="cell.isHidden" src="assets/images/brick.png" alt="Brick" class="cell-image" />
