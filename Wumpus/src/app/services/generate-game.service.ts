@@ -163,18 +163,9 @@ export class GenerateGameService {
         cell.type = CellType.BreezeAndSmell;
         cell.hasBreeze = true;
         break;
-      case CellType.Light:
-        cell.type = CellType.BreezeAndLight;
-        cell.hasBreeze = true;
-        break;
-      case CellType.SmellAndLight:
-        cell.type = CellType.Smell_Breeze_And_Light;
-        cell.hasBreeze = true;
-        break;
+      
       case CellType.Treasure:
         // If a pit is adjacent to treasure, it doesn't change to Light
-        cell.type = CellType.BreezeAndLight;
-        cell.hasBreeze = true;
         break;
     }
   }
@@ -190,14 +181,7 @@ export class GenerateGameService {
         cell.type = CellType.BreezeAndSmell;
         cell.hasSmell = true;
         break;
-      case CellType.Light:
-        cell.type = CellType.SmellAndLight;
-        cell.hasSmell = true;
-        break;
-      case CellType.BreezeAndLight:
-        cell.type = CellType.Smell_Breeze_And_Light;
-        cell.hasSmell = true;
-        break;
+      
     }
   }
 
@@ -205,16 +189,12 @@ export class GenerateGameService {
     // Handle target types for Treasure source
     switch (cell.type) {
       case CellType.Empty:
-        cell.type = CellType.Light;
         break;
       case CellType.Breeze:
-        cell.type = CellType.BreezeAndLight;
         break;
       case CellType.Smell:
-        cell.type = CellType.SmellAndLight;
         break;
       case CellType.BreezeAndSmell:
-        cell.type = CellType.Smell_Breeze_And_Light;
         break;
       case CellType.Pit:
         // If a pit is adjacent to treasure, don't change it to Light

@@ -88,12 +88,7 @@ export class AIService {
             case CellType.BreezeAndSmell:
               adjacentCell.type = CellType.Breeze;
               break;
-            case CellType.SmellAndLight:
-              adjacentCell.type = CellType.Light;
-              break;
-            case CellType.Smell_Breeze_And_Light:
-              adjacentCell.type = CellType.BreezeAndLight;
-              break;
+            
           }
 
           const adjacentRow = adjacentCell.position.row;
@@ -121,28 +116,8 @@ export class AIService {
       this.showMessage("You got a treasure!");
       this.generateGame.board[row][col].type = CellType.Empty;
 
-      //remove light from adjacents
-      const adjacentCells = this.helper.calculateAdjacentCells(row, col);
-      for (const adjacentCell of adjacentCells) {
-        switch (adjacentCell.type) {
-          case CellType.Light:
-            adjacentCell.type = CellType.Empty;
-            break;
-          case CellType.BreezeAndLight:
-            adjacentCell.type = CellType.Breeze;
-            break;
-          case CellType.SmellAndLight:
-            adjacentCell.type = CellType.Smell;
-            break;
-          case CellType.Smell_Breeze_And_Light:
-            adjacentCell.type = CellType.BreezeAndSmell;
-            break;
-        }
-
-        const adjacentRow = adjacentCell.position.row;
-        const adjacentCol = adjacentCell.position.column;
-        this.exploredBoard[adjacentRow][adjacentCol] = adjacentCell;
-      }
+      
+     
 
     }
 

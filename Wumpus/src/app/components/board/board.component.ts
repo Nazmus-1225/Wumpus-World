@@ -127,8 +127,6 @@ export class BoardComponent implements OnInit {
           isHidden: true,
           hasBreeze: false,
           hasSmell: false,
-          hasLight: false,
-
           position: {
             row: row,
             column: col
@@ -176,18 +174,8 @@ export class BoardComponent implements OnInit {
         return 'assets/images/Treasure.jpg';
       case CellType.Smell:
         return 'assets/images/smell.png';
-      case CellType.Light:
-        return 'assets/images/light.jpg';
       case CellType.BreezeAndSmell:
         return 'assets/images/bs.png';
-      case CellType.LightAndPit:
-        return 'assets/images/LightAndPit.jpg';
-      case CellType.BreezeAndLight:
-        return 'assets/images/LightAndBreeze.jpg';
-      case CellType.SmellAndLight:
-        return 'assets/images/LightAndSmell.jpg';
-      case CellType.Smell_Breeze_And_Light:
-        return 'assets/images/light_smell_breeze.jpg';
       case CellType.Empty:
         return 'assets/images/bg.png';
 
@@ -221,22 +209,12 @@ export class BoardComponent implements OnInit {
         return "Breeze";
       case CellType.Smell:
         return "Smell";
-      case CellType.Light:
-        return "Light";
       case CellType.BreezeAndSmell:
         return "BreezeAndSmell";
-      case CellType.BreezeAndLight:
-        return "BreezeAndLight";
-      case CellType.SmellAndLight:
-        return "SmellAndLight";
       case CellType.BreezeAndPit:
         return "BreezeAndPit";
       case CellType.SmellAndPit:
         return "SmellAndPit";
-      case CellType.LightAndPit:
-        return "LightAndPit";
-      case CellType.Smell_Breeze_And_Light:
-        return "light_smell_breeze"
       default:
         return "Unknown";
     }
